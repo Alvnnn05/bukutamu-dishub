@@ -1,0 +1,95 @@
+.form-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 20px 16px; /* Padding dikecilkan sedikit agar aman di HP */
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  border-top: 5px solid #1E3A8A;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden; /* Memastikan tidak ada konten meluap keluar kartu */
+}
+
+.form-title {
+  color: #1E3A8A;
+  margin-bottom: 18px;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.guest-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea,
+.btn-primary {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* Memperbaiki Tombol Kepotong */
+.btn-primary {
+  background-color: #FAAA15;
+  color: #1E3A8A;
+  font-weight: 700;
+  padding: 12px 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: 8px;
+  
+  /* Kunci agar teks tombol menyesuaikan lebar HP */
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  display: block;
+}
+/* Tambahkan di paling bawah FormInput.css */
+@media (max-width: 1024px) {
+  .form-card {
+    padding: 16px 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .btn-primary {
+    font-size: 0.85rem !important;
+    padding: 12px 6px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+}

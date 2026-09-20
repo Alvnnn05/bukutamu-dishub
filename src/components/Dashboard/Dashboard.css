@@ -1,0 +1,222 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+.dashboard-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 28px 24px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+  border: 1px solid #e2e8f0;
+  border-top: 5px solid #1E3A8A;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.dashboard-title {
+  color: #1E3A8A;
+  margin-bottom: 20px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+/* Control Bar Filter & Search */
+.filter-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.search-input,
+.filter-select,
+.filter-date {
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.btn-reset-filter {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-reset-filter:hover {
+  background-color: #e2e8f0;
+}
+
+/* Tabel styling */
+.table-responsive {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.guest-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.guest-table th {
+  background-color: #1E3A8A;
+  color: #ffffff;
+  padding: 14px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.guest-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.875rem;
+  vertical-align: middle;
+  color: #334155;
+}
+
+.guest-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.guest-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e2e8f0;
+}
+
+.no-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.sub-text {
+  font-size: 0.775rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.time-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.8rem;
+}
+
+.time-in { color: #1e293b; }
+.time-out { color: #15803d; font-weight: 600; }
+.time-pending { color: #94a3b8; font-style: italic; }
+
+/* Status Badge Kontras Tinggi */
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-block;
+  letter-spacing: 0.3px;
+}
+
+.badge.active {
+  background-color: #0284c7; /* Biru Kontras */
+  color: #ffffff;
+}
+
+.badge.completed {
+  background-color: #16a34a; /* Hijau Kontras */
+  color: #ffffff;
+}
+
+.btn-checkout {
+  background-color: #FAAA15;
+  color: #1E3A8A;
+  font-weight: 700;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.btn-checkout:hover {
+  background-color: #e59a0f;
+}
+
+.text-done {
+  color: #94a3b8;
+  font-weight: bold;
+}
+
+.empty-row {
+  text-align: center;
+  color: #94a3b8;
+  padding: 32px 16px;
+  font-style: italic;
+}
+
+/* Navigasi Paginasi */
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pagination-info {
+  font-size: 0.825rem;
+  color: #64748b;
+}
+
+.pagination-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.825rem;
+  color: #334155;
+  font-weight: 600;
+}
+
+.pagination-buttons button {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #1E3A8A;
+}
+
+.pagination-buttons button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-buttons button:not(:disabled):hover {
+  background-color: #f1f5f9;
+}

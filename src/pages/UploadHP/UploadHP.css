@@ -1,0 +1,111 @@
+.upload-container {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.upload-header {
+  background-color: #1E3A8A;
+  color: #ffffff;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.upload-header h1 {
+  font-size: 1.15rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+.upload-main {
+  padding: 20px 16px;
+  max-width: 450px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.guest-info-box {
+  background-color: #ffffff;
+  border-left: 4px solid #FAAA15;
+  padding: 14px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.guest-info-box p {
+  margin: 4px 0;
+  color: #334155;
+}
+
+.upload-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.upload-card h3 {
+  color: #1E3A8A;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.btn-camera {
+  display: block;
+  background-color: #1E3A8A;
+  color: #ffffff;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.preview-box {
+  margin-top: 16px;
+  width: 100%;
+}
+
+.preview-box img {
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+}
+
+.btn-submit-upload {
+  background-color: #FAAA15;
+  color: #1E3A8A;
+  font-weight: bold;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  width: 100%;
+  margin-top: 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.success-card {
+  text-align: center;
+  padding: 30px 20px;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  color: #166534;
+}

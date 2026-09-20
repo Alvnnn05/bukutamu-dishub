@@ -1,0 +1,35 @@
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 380px;
+  width: 90%;
+}
+
+.modal-title { color: #1E3A8A; }
+.qr-container {
+  padding: 16px;
+  border: 2px solid #1E3A8A;
+  border-radius: 8px;
+  display: inline-block;
+  margin: 16px 0;
+}
+.btn-cancel {
+  background-color: #f3f4f6;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.checkmark { font-size: 3rem; color: #10b981; }

@@ -62,16 +62,45 @@ export default function Dashboard({ refreshTrigger }) {
     setCurrentPage(1); // Reset ke halaman 1 tiap kali filter berubah
   }, [searchTerm, statusFilter, dateFilter, guests]);
 
+  // Handler Check-Out dengan update State Lokal (Tanpa re-fetch)
   const handleCheckout = async (id) => {
+    const checkOutTime = new Date().toISOString();
     const { error } = await supabase
       .from('tamu')
       .update({
         status: 'completed',
-        check_out_at: new Date().toISOString()
+        check_out_at: checkOutTime
       })
       .eq('id', id);
 
-    if (!error) fetchGuests();
+    if (!error) {
+      // Update data di state lokal langsung agar UI instant ter-update
+      setGuests((prev) =>
+        prev.map((g) =>
+          g.id === id ? { ...g, status: 'completed', check_out_at: checkOutTime } : g
+        )
+      );
+    } else {
+      alert('Gagal check-out: ' + error.message);
+    }
+  };
+
+  // Handler Hapus Data dengan update State Lokal (Tanpa re-fetch)
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm('Apakah Anda yakin ingin menghapus data tamu ini?');
+    if (!confirmDelete) return;
+
+    const { error } = await supabase
+      .from('tamu')
+      .delete()
+      .eq('id', id);
+
+    if (!error) {
+      // Hapus data dari state lokal langsung agar baris otomatis hilang dari tabel
+      setGuests((prev) => prev.filter((g) => g.id !== id));
+    } else {
+      alert('Gagal menghapus data: ' + error.message);
+    }
   };
 
   // Logika Paginasi
@@ -178,19 +207,34 @@ export default function Dashboard({ refreshTrigger }) {
                     </div>
                   </td>
                   <td>
-                    {/* 3. Badge Status Lebih Kontras */}
+                    {/* Badge Status */}
                     <span className={`badge ${guest.status}`}>
                       {guest.status === 'active' ? 'Berkunjung' : 'Selesai'}
                     </span>
                   </td>
                   <td>
-                    {guest.status === 'active' ? (
-                      <button className="btn-checkout" onClick={() => handleCheckout(guest.id)}>
-                        Check-Out
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      {guest.status === 'active' && (
+                        <button className="btn-checkout" onClick={() => handleCheckout(guest.id)}>
+                          Check-Out
+                        </button>
+                      )}
+                      
+                      <button 
+                        className="btn-delete" 
+                        onClick={() => handleDelete(guest.id)}
+                        style={{
+                          backgroundColor: '#e63946',
+                          color: '#fff',
+                          border: 'none',
+                          padding: '6px 12px',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Hapus
                       </button>
-                    ) : (
-                      <span className="text-done">-</span>
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))

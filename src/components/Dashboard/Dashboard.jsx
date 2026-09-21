@@ -28,26 +28,58 @@ export default function Dashboard({ refreshTrigger }) {
     }
   };
 
-  // Realtime Subscription + Fetch Awal
-  useEffect(() => {
-    fetchGuests();
+// Realtime Subscription + Fetch Awal
+useEffect(() => {
+  fetchGuests();
 
-    // Berlangganan perubahan tabel 'tamu' secara real-time dari Supabase
-    const channel = supabase
-      .channel('realtime-tamu')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'tamu' },
-        () => {
+  // Berlangganan perubahan tabel 'tamu' secara real-time dari Supabase
+  const channel = supabase
+    .channel('realtime-tamu-dashboard')
+    .on(
+      'postgres_changes',
+      { 
+        event: 'DELETE', 
+        schema: 'public', 
+        table: 'tamu' 
+      },
+      (payload) => {
+        // Ketika ada event HAPUS dari Supabase/Web, langsung hapus ID tersebut dari state lokal
+        if (payload.old && payload.old.id) {
+          setGuests((prev) => prev.filter((g) => g.id !== payload.old.id));
+        } else {
+          // Fallback jika payload kosong, panggil ulang data
           fetchGuests();
         }
-      )
-      .subscribe();
+      }
+    )
+    .on(
+      'postgres_changes',
+      { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'tamu' 
+      },
+      () => {
+        fetchGuests();
+      }
+    )
+    .on(
+      'postgres_changes',
+      { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'tamu' 
+      },
+      () => {
+        fetchGuests();
+      }
+    )
+    .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [refreshTrigger]);
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, [refreshTrigger]);
 
   // Efek untuk Filter & Search
   useEffect(() => {

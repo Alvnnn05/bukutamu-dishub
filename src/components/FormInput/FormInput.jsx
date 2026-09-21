@@ -56,7 +56,6 @@ export default function FormInput({ onSessionCreated }) {
             <option value="Sekretariat">Sekretariat</option>
             <option value="Bidang Lalu Lintas">Bidang Lalu Lintas</option>
             <option value="Bidang Angkutan Jalan">Bidang Angkutan Jalan</option>
-            <option value="Bidang Sarana & Prasarana">Bidang Sarana & Prasarana</option>
             <option value="Divisi DALOPS">Bidang DALOPS</option>
             <option value="Divisi Perparkiran">Bidang Perparkiran</option>
             <option value="UPTD Pengujian Kendaraan">Bidang Pengujian Kendaraan</option>

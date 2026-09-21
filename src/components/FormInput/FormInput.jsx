@@ -53,12 +53,17 @@ export default function FormInput({ onSessionCreated }) {
         <div className="form-group">
           <label>Tujuan Bidang / Unit Kerja</label>
           <select name="tujuan_bidang" value={formData.tujuan_bidang} onChange={handleChange}>
-            <option value="Sekretariat">Sekretariat</option>
-            <option value="Bidang Lalu Lintas">Bidang Lalu Lintas</option>
-            <option value="Bidang Angkutan Jalan">Bidang Angkutan Jalan</option>
-            <option value="Divisi DALOPS">Bidang DALOPS</option>
-            <option value="Divisi Perparkiran">Bidang Perparkiran</option>
-            <option value="UPTD Pengujian Kendaraan">Bidang Pengujian Kendaraan</option>
+            <option value="Sub Bagian Umum Dan Kepegawaian">Sub Bagian Umum Dan Kepegawaian</option>
+            <option value="Sub Bagian Keuangan Dan Penyusunan Program">Sub Bagian Keuangan Dan Penyusunan Program</option>
+            <option value="Bidang Angkutan">Bidang Angkutan</option>
+            <option value="Seksi Angkutan Orang">Seksi Angkutan Orang</option>
+            <option value="Seksi Angkutan Barang">Seksi Angkutan Barang</option>
+            <option value="Bidang Lalu Lintas, Sarana, Prasarana">Bidang Lalu Lintas, Sarana, Prasarana</option>
+            <option value="Seksi Parkir">Seksi Parkir</option>
+            <option value="Seksi Manajemen Rekayasa Lalu Lintas">Seksi Manajemen Rekayasa Lalu Lintas</option>
+            <option value="Seksi Penerangan Jalan Umum">Seksi Penerangan Jalan Umum</option>
+            <option value="Bidang Pengendalian Operasional Lalu Lintas Dan Angkutan Jalan">Bidang Pengendalian Operasional Lalu Lintas Dan Angkutan Jalan</option>
+            <option value="UPT Pengujian Kendaraan Bermotor">UPT Pengujian Kendaraan Bermotor</option>
           </select>
         </div>
         <div className="form-group">

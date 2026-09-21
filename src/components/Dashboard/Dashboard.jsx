@@ -28,8 +28,25 @@ export default function Dashboard({ refreshTrigger }) {
     }
   };
 
+  // Realtime Subscription + Fetch Awal
   useEffect(() => {
     fetchGuests();
+
+    // Berlangganan perubahan tabel 'tamu' secara real-time dari Supabase
+    const channel = supabase
+      .channel('realtime-tamu')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tamu' },
+        () => {
+          fetchGuests();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [refreshTrigger]);
 
   // Efek untuk Filter & Search
@@ -62,7 +79,7 @@ export default function Dashboard({ refreshTrigger }) {
     setCurrentPage(1); // Reset ke halaman 1 tiap kali filter berubah
   }, [searchTerm, statusFilter, dateFilter, guests]);
 
-  // Handler Check-Out dengan update State Lokal (Tanpa re-fetch)
+  // Handler Check-Out
   const handleCheckout = async (id) => {
     const checkOutTime = new Date().toISOString();
     const { error } = await supabase
@@ -73,19 +90,12 @@ export default function Dashboard({ refreshTrigger }) {
       })
       .eq('id', id);
 
-    if (!error) {
-      // Update data di state lokal langsung agar UI instant ter-update
-      setGuests((prev) =>
-        prev.map((g) =>
-          g.id === id ? { ...g, status: 'completed', check_out_at: checkOutTime } : g
-        )
-      );
-    } else {
+    if (error) {
       alert('Gagal check-out: ' + error.message);
     }
   };
 
-  // Handler Hapus Data dengan update State Lokal (Tanpa re-fetch)
+  // Handler Hapus Data
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm('Apakah Anda yakin ingin menghapus data tamu ini?');
     if (!confirmDelete) return;
@@ -95,10 +105,7 @@ export default function Dashboard({ refreshTrigger }) {
       .delete()
       .eq('id', id);
 
-    if (!error) {
-      // Hapus data dari state lokal langsung agar baris otomatis hilang dari tabel
-      setGuests((prev) => prev.filter((g) => g.id !== id));
-    } else {
+    if (error) {
       alert('Gagal menghapus data: ' + error.message);
     }
   };
@@ -207,7 +214,6 @@ export default function Dashboard({ refreshTrigger }) {
                     </div>
                   </td>
                   <td>
-                    {/* Badge Status */}
                     <span className={`badge ${guest.status}`}>
                       {guest.status === 'active' ? 'Berkunjung' : 'Selesai'}
                     </span>

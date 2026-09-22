@@ -15,7 +15,8 @@ export default function App() {
   // Ganti dengan email admin resmi yang kamu daftarkan di Supabase
   const ADMIN_EMAILS = [
     'hermanbsa1999@gmail.com',
-    'vinandrian05@gmail.com'
+    'vinandrian05@gmail.com',
+    'andrianvin1205@gmail.com'
   ]; 
 
   useEffect(() => {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import * as XLSX from 'xlsx';
 import './Dashboard.css';
 
 export default function Dashboard({ refreshTrigger }) {
@@ -28,64 +29,36 @@ export default function Dashboard({ refreshTrigger }) {
     }
   };
 
-// Realtime Subscription + Fetch Awal
-useEffect(() => {
-  fetchGuests();
+  // Realtime Subscription
+  useEffect(() => {
+    fetchGuests();
 
-  // Berlangganan perubahan tabel 'tamu' secara real-time dari Supabase
-  const channel = supabase
-    .channel('realtime-tamu-dashboard')
-    .on(
-      'postgres_changes',
-      { 
-        event: 'DELETE', 
-        schema: 'public', 
-        table: 'tamu' 
-      },
-      (payload) => {
-        // Ketika ada event HAPUS dari Supabase/Web, langsung hapus ID tersebut dari state lokal
-        if (payload.old && payload.old.id) {
-          setGuests((prev) => prev.filter((g) => g.id !== payload.old.id));
-        } else {
-          // Fallback jika payload kosong, panggil ulang data
-          fetchGuests();
+    const channel = supabase
+      .channel('realtime-tamu-dashboard')
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'tamu' },
+        (payload) => {
+          if (payload.old && payload.old.id) {
+            setGuests((prev) => prev.filter((g) => g.id !== payload.old.id));
+          } else {
+            fetchGuests();
+          }
         }
-      }
-    )
-    .on(
-      'postgres_changes',
-      { 
-        event: 'INSERT', 
-        schema: 'public', 
-        table: 'tamu' 
-      },
-      () => {
-        fetchGuests();
-      }
-    )
-    .on(
-      'postgres_changes',
-      { 
-        event: 'UPDATE', 
-        schema: 'public', 
-        table: 'tamu' 
-      },
-      () => {
-        fetchGuests();
-      }
-    )
-    .subscribe();
+      )
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'tamu' }, () => fetchGuests())
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tamu' }, () => fetchGuests())
+      .subscribe();
 
-  return () => {
-    supabase.removeChannel(channel);
-  };
-}, [refreshTrigger]);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refreshTrigger]);
 
-  // Efek untuk Filter & Search
+  // Efek Filter
   useEffect(() => {
     let result = guests;
 
-    // Filter Nama / Instansi
     if (searchTerm) {
       result = result.filter(
         (g) =>
@@ -94,12 +67,10 @@ useEffect(() => {
       );
     }
 
-    // Filter Status
     if (statusFilter !== 'all') {
       result = result.filter((g) => g.status === statusFilter);
     }
 
-    // Filter Tanggal
     if (dateFilter) {
       result = result.filter((g) => {
         const guestDate = new Date(g.created_at).toISOString().split('T')[0];
@@ -108,41 +79,52 @@ useEffect(() => {
     }
 
     setFilteredGuests(result);
-    setCurrentPage(1); // Reset ke halaman 1 tiap kali filter berubah
+    setCurrentPage(1);
   }, [searchTerm, statusFilter, dateFilter, guests]);
 
-  // Handler Check-Out
+  // Handler Check-Out & Delete
   const handleCheckout = async (id) => {
     const checkOutTime = new Date().toISOString();
     const { error } = await supabase
       .from('tamu')
-      .update({
-        status: 'completed',
-        check_out_at: checkOutTime
-      })
+      .update({ status: 'completed', check_out_at: checkOutTime })
       .eq('id', id);
 
-    if (error) {
-      alert('Gagal check-out: ' + error.message);
-    }
+    if (error) alert('Gagal check-out: ' + error.message);
   };
 
-  // Handler Hapus Data
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm('Apakah Anda yakin ingin menghapus data tamu ini?');
-    if (!confirmDelete) return;
-
-    const { error } = await supabase
-      .from('tamu')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      alert('Gagal menghapus data: ' + error.message);
-    }
+    if (!window.confirm('Apakah Anda yakin ingin menghapus data tamu ini?')) return;
+    const { error } = await supabase.from('tamu').delete().eq('id', id);
+    if (error) alert('Gagal menghapus data: ' + error.message);
   };
 
-  // Logika Paginasi
+  // --- FUNGSI EXPORT EXCEL ---
+  const exportToExcel = () => {
+    if (filteredGuests.length === 0) {
+      alert('Tidak ada data untuk diekspor!');
+      return;
+    }
+
+    const dataToExport = filteredGuests.map((g, index) => ({
+      No: index + 1,
+      'Nama Tamu': g.nama_tamu,
+      'No. HP': g.no_hp,
+      'Instansi Asal': g.instansi_asal,
+      'Tujuan Bidang': g.tujuan_bidang,
+      Perihal: g.perihal,
+      'Waktu Masuk': new Date(g.created_at).toLocaleString('id-ID'),
+      'Waktu Keluar': g.check_out_at ? new Date(g.check_out_at).toLocaleString('id-ID') : 'Masih Berkunjung',
+      Status: g.status === 'active' ? 'Berkunjung' : 'Selesai'
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Laporan Tamu');
+    XLSX.writeFile(workbook, `Laporan_Buku_Tamu_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
+  // Paginasi Logika
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredGuests.slice(indexOfFirstItem, indexOfLastItem);
@@ -150,9 +132,18 @@ useEffect(() => {
 
   return (
     <div className="dashboard-card">
-      <h2 className="dashboard-title">Daftar Tamu Aktif & Riwayat</h2>
+      <div className="dashboard-header-container">
+        <h2 className="dashboard-title">Daftar Tamu Aktif & Riwayat</h2>
+        
+        {/* Tombol Export Excel */}
+        <div className="export-buttons">
+          <button className="btn-export btn-excel" onClick={exportToExcel}>
+            Export Excel
+          </button>
+        </div>
+      </div>
 
-      {/* 1. Baris Filter & Pencarian */}
+      {/* Baris Filter & Pencarian */}
       <div className="filter-container">
         <input
           type="text"
@@ -281,7 +272,7 @@ useEffect(() => {
         </table>
       </div>
 
-      {/* 2. Navigasi Paginasi */}
+      {/* Navigasi Paginasi */}
       {filteredGuests.length > 0 && (
         <div className="pagination-container">
           <span className="pagination-info">

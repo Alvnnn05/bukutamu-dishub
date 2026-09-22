@@ -15,3 +15,9 @@ html, body, #root {
   background-color: #f8fafc;
   color: #0f172a;
 }
+
+body {
+  background: linear-gradient(135deg, #E8EDF9 50%, #FFFFFF 100%);
+  min-height: 100vh;
+  margin: 0;
+}

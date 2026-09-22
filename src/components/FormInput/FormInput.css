@@ -1,95 +1,344 @@
-.form-card {
+/* Container Dua Kolom (Kiri Form: 360px, Kanan Tabel: Flex) */
+.form-input-container {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: start;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Card Styling */
+.form-card,
+.table-card-right {
   background-color: #ffffff;
   border-radius: 12px;
-  padding: 20px 16px; /* Padding dikecilkan sedikit agar aman di HP */
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
   border-top: 5px solid #1E3A8A;
-  width: 100% !important;
-  max-width: 100% !important;
   box-sizing: border-box !important;
-  overflow: hidden; /* Memastikan tidak ada konten meluap keluar kartu */
 }
 
 .form-title {
   color: #1E3A8A;
-  margin-bottom: 18px;
-  font-size: 1.15rem;
+  margin-bottom: 16px;
+  font-size: 1.1rem;
   font-weight: 700;
 }
 
+/* Form Styling */
 .guest-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  width: 100% !important;
-  box-sizing: border-box !important;
+  gap: 12px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  width: 100% !important;
-  box-sizing: border-box !important;
+  gap: 4px;
 }
 
 .form-group label {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  color: #1e293b;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea,
-.btn-primary {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
+  color: #334155;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-  padding: 10px 12px;
+  width: 100%;
+  padding: 8px 10px;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 0.9rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
   background-color: #ffffff !important;
   color: #0f172a !important;
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
-/* Memperbaiki Tombol Kepotong */
-.btn-primary {
+.form-group input[type="file"] {
+  padding: 6px;
+  background-color: #f8fafc !important;
+}
+
+.image-preview-container {
+  margin-top: 6px;
+  text-align: center;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 140px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  object-fit: cover;
+}
+
+.btn-submit {
   background-color: #FAAA15;
   color: #1E3A8A;
   font-weight: 700;
-  padding: 12px 10px;
+  padding: 10px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   text-align: center;
-  margin-top: 8px;
-  
-  /* Kunci agar teks tombol menyesuaikan lebar HP */
-  white-space: normal !important;
-  word-wrap: break-word !important;
-  display: block;
+  margin-top: 6px;
+  width: 100%;
+  transition: background-color 0.2s;
+  font-family: inherit;
 }
-/* Tambahkan di paling bawah FormInput.css */
+
+.btn-submit:hover {
+  background-color: #e59b12;
+}
+
+.btn-submit:disabled {
+  background-color: #cbd5e1;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+/* Filter Baris Atas Tabel */
+.filter-row-input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.search-input-right {
+  flex: 2;
+  min-width: 180px;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.filter-select-right,
+.filter-date-right {
+  flex: 1;
+  min-width: 130px;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+/* Tabel Styling */
+.table-responsive-right {
+  overflow-x: auto;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.guest-table-right {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  text-align: left;
+  font-family: inherit;
+}
+
+.guest-table-right th {
+  background-color: #1E3A8A;
+  color: #ffffff;
+  padding: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.guest-table-right td {
+  padding: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #1e293b;
+  vertical-align: middle;
+}
+
+.guest-table-right tbody tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+.empty-row-right {
+  text-align: center;
+  padding: 24px !important;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* Elemen Di Dalam Tabel */
+.table-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #cbd5e1;
+  flex-shrink: 0;
+}
+
+.no-avatar-cell {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  flex-shrink: 0;
+}
+
+.sub-detail {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 400;
+}
+
+.time-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.82rem;
+  color: #1e293b;
+}
+
+.time-details strong {
+  font-weight: 700;
+}
+
+/* Hijau khusus untuk teks waktu keluar */
+.time-out-text {
+  color: #15803d !important;
+  font-weight: 600;
+}
+
+.time-out-text strong {
+  color: #15803d !important;
+  font-weight: 700;
+}
+
+/* Status Pill (Sesuai Gambar Acuan) */
+.status-pill {
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 16px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.status-pill.active {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.status-pill.completed {
+  background-color: #16a34a;
+  color: #ffffff;
+}
+
+.btn-checkout-table {
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+  font-family: inherit;
+}
+
+.btn-checkout-table:hover {
+  background-color: #dc2626;
+}
+
+/* Styling Paginasi Tabel Kanan */
+.pagination-container-right {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pagination-info-right {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.pagination-buttons-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #334155;
+}
+
+.pagination-buttons-right button {
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #1e3a8a;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.pagination-buttons-right button:hover:not(:disabled) {
+  background-color: #e59b12;
+  color: #1e3a8a;
+}
+
+.pagination-buttons-right button:disabled {
+  background-color: #f8fafc;
+  color: #94a3b8;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+}
+
+/* Responsive Laptop / HP */
 @media (max-width: 1024px) {
-  .form-card {
-    padding: 16px 12px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
+  .form-input-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .filter-row-input {
+    flex-direction: column;
   }
 
-  .btn-primary {
-    font-size: 0.85rem !important;
-    padding: 12px 6px !important;
-    white-space: normal !important;
-    word-break: break-word !important;
+  .search-input-right,
+  .filter-select-right,
+  .filter-date-right {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .pagination-container-right {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

@@ -1,64 +1,150 @@
+/* Container Utama Halaman Login */
+.login-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #0d233a 0%, #1a3d60 50%, #e49707 100%) !important;
+  background-attachment: fixed;
+  padding: 20px 16px; /* 👈 Tambahan: memberi jarak aman di pinggir layar HP */
+  box-sizing: border-box; /* 👈 Tambahan: mencegah overflow pada layar sempit */
+}
+
+/* Card Login */
 .login-card {
-  background-color: #ffffff;
-  border-radius: 12px;
-  padding: 24px 20px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
-  border-top: 5px solid #1E3A8A;
-  max-width: 420px;
-  margin: 40px auto;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 35px 35px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* Header & Header Icon di Card */
+.login-header-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.login-logo-img {
+  width: 120px;           
+  height: auto;          
+  max-height: 90px;      
+  object-fit: contain;
 }
 
 .login-title {
-  color: #1E3A8A;
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 6px;
-  text-align: center;
+  color: #1e3a8a;
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.5px;
 }
 
 .login-subtitle {
   color: #64748b;
-  font-size: 0.85rem;
-  margin-bottom: 20px;
-  text-align: center;
+  font-size: 0.95rem;
+  margin-bottom: 24px;
 }
 
-.login-error {
-  background-color: #fef2f2;
-  color: #ef4444;
-  padding: 10px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  margin-bottom: 16px;
-  border: 1px solid #fecaca;
-  text-align: center;
-}
-
+/* Form Styling */
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
+  text-align: left;
 }
 
-.btn-login {
-  background-color: #1E3A8A;
-  color: #ffffff;
-  font-weight: 700;
-  padding: 12px;
-  border: none;
+.form-group-login {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group-login label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.form-group-login input {
+  padding: 12px 16px;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
-  cursor: pointer;
   font-size: 0.9rem;
-  margin-top: 8px;
-  transition: background-color 0.2s;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box; /* 👈 Tambahan: menjaga agar input tidak offscreen di HP */
 }
 
-.btn-login:hover {
-  background-color: #1d3557;
+.form-group-login input:focus {
+  border-color: #1e3a8a;
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15);
 }
 
-.btn-login:disabled {
-  background-color: #94a3b8;
-  cursor: not-allowed;
+/* Tombol Submit */
+.btn-login-submit {
+  background-color: #1e3a8a;
+  color: #ffffff;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-login-submit:hover {
+  background-color: #e59b12;
+}
+
+.btn-login-submit:active {
+  transform: scale(0.98);
+}
+
+/* Footer Teks Sederhana di Luar Card */
+.login-footer-text {
+  margin-top: 24px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+/* MEDIA RESPONSIF UNTUK TAMPILAN HP */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 24px 18px; /* Menyelaraskan padding internal agar muat di layar sempit */
+  }
+
+  .login-logo-img {
+    width: 90px;
+    max-height: 70px;
+  }
+
+  .login-title {
+    font-size: 1.45rem;
+  }
+
+  .login-subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+  }
+
+  .form-group-login input,
+  .btn-login-submit {
+    padding: 11px 14px;
+    font-size: 0.95rem;
+  }
+
+  .login-footer-text {
+    font-size: 0.75rem;
+  }
 }

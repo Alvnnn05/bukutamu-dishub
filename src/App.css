@@ -1,209 +1,208 @@
-/* Layout Utama App */
-.pc-layout {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background-color: #f1f5f9;
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  color: #0f172a;
+/* Import Font Plus Jakarta Sans */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* Header & Navbar Utama */
-.app-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #1E3A8A;
-  color: #ffffff;
-  padding: 16px 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  flex-wrap: wrap;
-  gap: 16px;
+body {
+font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+background: linear-gradient(135deg, #172554 0%, #1e3a8a 65%, #e49707 100%);
+background-attachment: fixed;  min-height: 100vh;
+color: #1e293b;
+}
+
+/* App Layout Container */
+#root,
+.app-container,
+.main-content {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* HEADER / NAVBAR UTAMA */
+.main-header {
+background: rgba(15, 23, 42, 0.65) !important; /* Biru gelap transparan */
+backdrop-filter: blur(12px);                   /* Efek blur kaca */
+-webkit-backdrop-filter: blur(12px);
+border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+padding: 14px 28px;
+display: flex;
+justify-content: space-between; /* Mendorong elemen ke ujung kiri dan kanan */
+align-items: center;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+position: sticky;
+top: 0;
+z-index: 100;
+width: 100%;
 }
 
 .header-brand {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
-.header-logo {
-  height: 48px;
+.logo-placeholder {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+/* Styling Logo di Header Navbar */
+.header-logo-img {
+  width: 52px;         
+  height: 52px;        
+  object-fit: contain;  
+  border-radius: 6px;   
+}
+
+.header-title {
+  color: #ffffff; 
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.header-subtitle {
+  color: #cbd5e1; 
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* HEADER ACTIONS & ROLE BADGES */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Styling Badge Role Kapsul */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;                         
+  background-color: #f1f5f9;        
+  color: #2563eb;                  
+  padding: 6px 18px;                
+  border-radius: 50px;              
+  font-weight: 700;                 
+  font-size: 0.95rem;               
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Ukuran Dasar Ikon di Badge */
+.badge-icon {
+  height: 22px;
+  width: auto;
+  object-fit: contain;  
+}
+
+/* Penyesuaian Ukuran Khusus Ikon Resepsionis Agar Seimbang */
+.badge-icon-resepsionis {
+  height: 22px;
   width: auto;
   object-fit: contain;
 }
 
-.header-text-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+.role-badge.admin,
+.role-badge.resepsionis {
+  background-color: #f1f5f9;
+  color: #2563eb;
+  border: 1px solid #cbd5e1;
 }
 
-.main-title {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: #ffffff;
-}
-
-.title-divider {
-  color: #FAAA15;
-  font-weight: 700;
-  font-size: 1.2rem;
-}
-
-.sub-title {
-  font-size: 0.9rem;
-  font-weight: 400;
-  opacity: 0.9;
-  color: #e2e8f0;
-}
-
-/* Navigasi Tab Header */
-.header-nav {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.nav-btn {
-  background-color: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 9px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.88rem;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.nav-btn:hover {
-  background-color: rgba(255, 255, 255, 0.22);
-  transform: translateY(-1px);
-}
-
-.nav-btn.active {
-  background-color: #FAAA15;
+/* Tombol Header (Profil & Logout) */
+.btn-header-profile {
+  background-color: #f1f5f9;
   color: #1E3A8A;
-  border-color: #FAAA15;
-  font-weight: 700;
-  box-shadow: 0 2px 8px rgba(250, 170, 21, 0.3);
+  border: 1px solid #cbd5e1;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
 }
 
-.btn-logout {
-  background-color: #ef4444;
-  border-color: #ef4444;
+.btn-header-profile:hover {
+  background-color: #e2e8f0;
+  border-color: #94a3b8;
 }
 
-.btn-logout:hover {
-  background-color: #dc2626;
-  border-color: #dc2626;
+.btn-header-logout {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
 }
 
-/* Konten Utama */
-.app-main {
+.btn-header-logout:hover {
+  background-color: #fca5a5;
+  color: #7f1d1d;
+}
+
+/* MAIN CONTENT AREA */
+.main-content {
   flex: 1;
-  padding: 24px;
-  max-width: 1200px;
+  padding: 24px 28px;
   width: 100%;
+  max-width: 1440px;
   margin: 0 auto;
   box-sizing: border-box;
 }
 
-/* Footer */
-.app-footer {
-  background-color: #0f172a;
-  color: #94a3b8;
-  text-align: center;
-  padding: 16px;
-  font-size: 0.85rem;
-  margin-top: auto;
-  border-top: 1px solid #1e293b;
+.loading-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1E3A8A;
 }
 
-.app-footer p {
-  margin: 0;
-}
-
-.unauthorized-card {
-  background-color: #ffffff;
-  border-radius: 12px;
-  padding: 32px 24px;
-  text-align: center;
-  max-width: 500px;
-  margin: 40px auto;
-  border: 1px solid #fecaca;
-  border-top: 5px solid #ef4444;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-}
-
-.unauthorized-card h2 {
-  color: #ef4444;
-  margin-bottom: 12px;
-  font-size: 1.3rem;
-}
-
-.unauthorized-card p {
-  color: #475569;
-  font-size: 0.95rem;
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-
-.unauthorized-card .btn-logout {
-  display: inline-block;
-}
-
-/* Penyesuaian Tampilan Responsif HP & Tablet */
+/* RESPONSIVE HEADER MOBILE */
 @media (max-width: 768px) {
-  .app-header {
-    padding: 14px 16px;
+  .main-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    padding: 16px;
   }
 
   .header-brand {
-    gap: 10px;
+    flex-direction: column;
+    gap: 1px;
   }
 
-  .header-logo {
-    height: 38px;
+  .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
   }
 
-  .main-title {
-    font-size: 1.25rem;
-  }
-
-  .title-divider {
-    display: none;
-  }
-
-  .sub-title {
-    display: block;
-    width: 100%;
-    font-size: 0.78rem;
-  }
-
-  .header-nav {
-    width: 100%;
-    justify-content: space-between;
-    margin-top: 4px;
-  }
-
-  .nav-btn {
-    flex: 1;
-    justify-content: center;
-    padding: 8px 10px;
+  .role-badge,
+  .btn-header-profile,
+  .btn-header-logout {
     font-size: 0.8rem;
+    padding: 6px 12px;
   }
 
-  .app-main {
-    padding: 16px 12px;
+  .main-content {
+    padding: 12px;
   }
 }

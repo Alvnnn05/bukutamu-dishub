@@ -1,48 +1,51 @@
-/* Container Dua Kolom (Kiri Form: 360px, Kanan Tabel: Flex) */
+/* Layout Utama Form & Tabel (Kiri & Kanan) */
 .form-input-container {
-  display: grid;
-  grid-template-columns: 360px 1fr;
-  gap: 20px;
-  width: 100%;
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  align-items: flex-start;
   box-sizing: border-box;
-  align-items: start;
-  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Card Styling */
-.form-card,
-.table-card-right {
-  background-color: #ffffff;
+/* Card Kiri (Form Input) */
+.form-card {
+  flex: 1;
+  min-width: 320px;
+  max-width: 400px;
+  background: #ffffff;
+  padding: 24px;
   border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border: 1px solid #e2e8f0;
-  border-top: 5px solid #1E3A8A;
-  box-sizing: border-box !important;
 }
 
 .form-title {
-  color: #1E3A8A;
-  margin-bottom: 16px;
-  font-size: 1.1rem;
+  color: #1e3a8a;
+  font-size: 1.2rem;
   font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f1f5f9;
 }
 
-/* Form Styling */
+/* Form Group & Input Styling */
 .guest-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .form-group label {
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #334155;
 }
@@ -50,66 +53,89 @@
 .form-group input,
 .form-group select,
 .form-group textarea {
-  width: 100%;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  box-sizing: border-box;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
   font-family: inherit;
+  transition: border-color 0.2s;
 }
 
-.form-group input[type="file"] {
-  padding: 6px;
-  background-color: #f8fafc !important;
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #1e3a8a;
 }
 
 .image-preview-container {
-  margin-top: 6px;
+  margin-top: 8px;
   text-align: center;
 }
 
 .image-preview {
   max-width: 100%;
-  max-height: 140px;
-  border-radius: 6px;
-  border: 1px solid #cbd5e1;
+  max-height: 150px;
+  border-radius: 8px;
   object-fit: cover;
 }
 
 .btn-submit {
-  background-color: #FAAA15;
-  color: #1E3A8A;
-  font-weight: 700;
-  padding: 10px;
+  background-color: #1e3a8a;
+  color: #ffffff;
   border: none;
-  border-radius: 6px;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
   cursor: pointer;
-  font-size: 0.88rem;
-  text-align: center;
-  margin-top: 6px;
-  width: 100%;
   transition: background-color 0.2s;
-  font-family: inherit;
+  margin-top: 8px;
 }
 
 .btn-submit:hover {
-  background-color: #e59b12;
+  background-color: #e49707;
 }
 
-.btn-submit:disabled {
-  background-color: #cbd5e1;
-  color: #64748b;
-  cursor: not-allowed;
+/* Card Kanan (Tabel Data Tamu) */
+.table-card-right {
+  flex: 2;
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.table-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.btn-export-excel-small {
+  background-color: #10b981;
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-export-excel-small:hover {
+  background-color: #059669;
 }
 
 /* Filter Baris Atas Tabel */
 .filter-row-input {
   display: flex;
-  gap: 10px;
-  margin-bottom: 14px;
+  gap: 12px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
 }
 
@@ -119,73 +145,58 @@
   padding: 8px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
-  font-size: 0.85rem;
-  box-sizing: border-box;
-  font-family: inherit;
 }
 
 .filter-select-right,
 .filter-date-right {
   flex: 1;
   min-width: 130px;
-  padding: 8px 10px;
+  padding: 8px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
-  font-size: 0.85rem;
-  background-color: #ffffff;
-  box-sizing: border-box;
-  font-family: inherit;
 }
 
-/* Tabel Styling */
+/* Tabel Responsive & Avatar */
 .table-responsive-right {
   overflow-x: auto;
-  border-radius: 6px;
-  border: 1px solid #e2e8f0;
 }
 
 .guest-table-right {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
   text-align: left;
-  font-family: inherit;
+  font-size: 0.88rem;
 }
 
 .guest-table-right th {
-  background-color: #1E3A8A;
+  background-color: #1e3a8a;
   color: #ffffff;
   padding: 12px;
   font-weight: 600;
-  white-space: nowrap;
 }
 
 .guest-table-right td {
   padding: 12px;
-  border-bottom: 1px solid #e2e8f0;
-  color: #1e293b;
+  border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
 }
 
-.guest-table-right tbody tr:nth-child(even) {
-  background-color: #f8fafc;
-}
-
-.empty-row-right {
-  text-align: center;
-  padding: 24px !important;
-  color: #94a3b8;
-  font-style: italic;
-}
-
-/* Elemen Di Dalam Tabel */
+/* Gambar Avatar di Tabel */
 .table-avatar {
   width: 42px;
   height: 42px;
   border-radius: 50%;
   object-fit: cover;
-  border: 1px solid #cbd5e1;
-  flex-shrink: 0;
+  display: block;
+}
+
+.clickable-avatar {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.clickable-avatar:hover {
+  transform: scale(1.1);
 }
 
 .no-avatar-cell {
@@ -194,50 +205,37 @@
   border-radius: 50%;
   background-color: #e2e8f0;
   color: #64748b;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.68rem;
-  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
 }
 
 .sub-detail {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: #64748b;
-  font-weight: 400;
+  margin-top: 2px;
 }
 
 .time-details {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font-size: 0.82rem;
-  color: #1e293b;
+  font-size: 0.8rem;
 }
 
-.time-details strong {
-  font-weight: 700;
-}
-
-/* Hijau khusus untuk teks waktu keluar */
 .time-out-text {
-  color: #15803d !important;
-  font-weight: 600;
+  color: #059669;
 }
 
-.time-out-text strong {
-  color: #15803d !important;
-  font-weight: 700;
-}
-
-/* Status Pill (Sesuai Gambar Acuan) */
+/* Status Pill Badges */
 .status-pill {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
   display: inline-block;
-  padding: 5px 14px;
-  border-radius: 16px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-align: center;
 }
 
 .status-pill.active {
@@ -246,99 +244,314 @@
 }
 
 .status-pill.completed {
-  background-color: #16a34a;
-  color: #ffffff;
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+/* Action Buttons Cell */
+.action-buttons-cell {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  white-space: nowrap;
 }
 
 .btn-checkout-table {
-  background-color: #ef4444;
-  color: #ffffff;
+  background-color: #10b981;
+  color: white;
   border: none;
-  padding: 6px 12px;
+  padding: 6px 10px;
   border-radius: 6px;
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
   transition: background-color 0.2s;
-  font-family: inherit;
 }
 
 .btn-checkout-table:hover {
+  background-color: #059669;
+}
+
+.btn-delete-table {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-delete-table:hover {
   background-color: #dc2626;
 }
 
-/* Styling Paginasi Tabel Kanan */
+/* Paginasi */
 .pagination-container-right {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 14px;
-  padding-top: 10px;
-  border-top: 1px solid #e2e8f0;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.pagination-info-right {
-  font-size: 0.8rem;
+  margin-top: 16px;
+  font-size: 0.82rem;
   color: #64748b;
 }
 
 .pagination-buttons-right {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
-  color: #334155;
+  gap: 10px;
 }
 
 .pagination-buttons-right button {
-  background-color: #f1f5f9;
+  padding: 6px 12px;
   border: 1px solid #cbd5e1;
-  color: #1e3a8a;
-  padding: 5px 10px;
-  border-radius: 4px;
+  background: #ffffff;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 0.78rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  font-family: inherit;
-}
-
-.pagination-buttons-right button:hover:not(:disabled) {
-  background-color: #e59b12;
-  color: #1e3a8a;
 }
 
 .pagination-buttons-right button:disabled {
-  background-color: #f8fafc;
-  color: #94a3b8;
-  border-color: #e2e8f0;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* Responsive Laptop / HP */
-@media (max-width: 1024px) {
-  .form-input-container {
-    grid-template-columns: 1fr;
+/* MODAL OVERLAY UMUM */
+.modal-overlay,
+.image-preview-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  backdrop-filter: blur(3px);
+}
+
+/* Card Modal Preview Gambar Pop-up */
+.image-preview-content {
+  position: relative;
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 12px;
+  max-width: 80vw;
+  max-height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.preview-full-img {
+  max-width: 100%;
+  max-height: 75vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.preview-close-btn {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  background: #ef4444;
+  color: #ffffff;
+  border: 2px solid white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Card Modal Konfirmasi (Hapus & Check-out) */
+.delete-modal-card {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+}
+
+.delete-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn-cancel {
+  background-color: #94a3b8;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-cancel:hover {
+  background-color: #64748b;
+}
+
+.btn-confirm-delete {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-confirm-delete:hover {
+  background-color: #dc2626;
+}
+
+/* Card Modal Sukses */
+.success-modal-card {
+  background: #ffffff;
+  padding: 32px 28px;
+  border-radius: 16px;
+  max-width: 380px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Badge Ikon Centang */
+.success-icon-badge {
+  font-size: 2.2rem;
+  width: 64px;
+  height: 64px;
+  background-color: #dcfce7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px auto;
+}
+
+/* Judul Modal Sukses */
+.success-modal-title {
+  margin: 0 0 8px 0;
+  color: #1e3a8a;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+/* Teks Deskripsi Sukses */
+.success-modal-text {
+  margin: 0 0 24px 0;
+  color: #64748b;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+/* Tombol OK Full Width */
+.btn-success-ok {
+  width: 100%;
+  background-color: #1e3a8a;
+  color: #ffffff;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-success-ok:hover {
+  background-color: #172554;
+}
+
+.btn-success-ok:active {
+  transform: scale(0.98);
+}
+
+/* Animasi Pop-in Modal */
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
-@media (max-width: 640px) {
+/* RESPONSIVE TABLET (MAX-WIDTH: 992PX) */
+@media (max-width: 992px) {
+  .form-input-container {
+    flex-direction: column;
+  }
+  .form-card,
+  .table-card-right {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+/* RESPONSIVE MOBILE (MAX-WIDTH: 768PX) */
+@media (max-width: 768px) {
+  .form-input-container {
+    padding: 8px;
+    gap: 16px;
+  }
+
+  .form-card,
+  .table-card-right {
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  /* Header Tabel + Tombol Export Excel */
+  .table-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .btn-export-excel-small {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Filter Input Menjadi 1 Kolom Penuh */
   .filter-row-input {
     flex-direction: column;
+    gap: 8px;
   }
 
   .search-input-right,
   .filter-select-right,
   .filter-date-right {
     width: 100%;
-    min-width: unset;
+    min-width: 100%;
   }
 
+  /* Paginasi Rapi Vertikal di HP */
   .pagination-container-right {
     flex-direction: column;
-    align-items: flex-start;
+    gap: 12px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .pagination-buttons-right {
+    width: 100%;
+    justify-content: center;
   }
 }

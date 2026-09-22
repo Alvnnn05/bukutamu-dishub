@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import * as XLSX from 'xlsx';
 import './FormInput.css';
 
-export default function FormInput({ onDataSubmitted }) {
-  // State Form Input
+export default function FormInput({ userSession, isAdmin }) {
   const [formData, setFormData] = useState({
     nama_tamu: '',
     instansi_asal: '',
     no_hp: '',
-    tujuan_bidang: '',
+    tujuan_bidang: 'Sekretariat',
     perihal: ''
   });
 
@@ -23,11 +23,20 @@ export default function FormInput({ onDataSubmitted }) {
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('');
 
+  // State Modal Hapus & Check-out
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [checkoutTarget, setCheckoutTarget] = useState(null);
+
+  // State Notifikasi Sukses
+  const [successMessage, setSuccessMessage] = useState(null);
+
+  // State Preview Gambar dari Tabel
+  const [previewImage, setPreviewImage] = useState(null);
+
   // State Paginasi (5 Data per Halaman)
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Fetch Data Tamu dari Supabase
   const fetchGuests = async () => {
     const { data, error } = await supabase
       .from('tamu')
@@ -45,7 +54,7 @@ export default function FormInput({ onDataSubmitted }) {
     fetchGuests();
 
     const channel = supabase
-      .channel('realtime-tamu-form-page')
+      .channel('realtime-tamu-unified')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tamu' }, () => fetchGuests())
       .subscribe();
 
@@ -54,7 +63,6 @@ export default function FormInput({ onDataSubmitted }) {
     };
   }, []);
 
-  // Filter Data Tamu & Reset Halaman ke 1 saat Filter Berubah
   useEffect(() => {
     let result = guests;
 
@@ -81,7 +89,6 @@ export default function FormInput({ onDataSubmitted }) {
     setCurrentPage(1);
   }, [searchTerm, statusFilter, dateFilter, guests]);
 
-  // Handle Form Change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -94,7 +101,6 @@ export default function FormInput({ onDataSubmitted }) {
     }
   };
 
-  // Submit Form Input Tamu
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -111,9 +117,7 @@ export default function FormInput({ onDataSubmitted }) {
           .from('foto-tamu')
           .upload(filePath, imageFile);
 
-        if (uploadError) {
-          throw new Error('Gagal mengunggah foto: ' + uploadError.message);
-        }
+        if (uploadError) throw new Error('Gagal unggah foto: ' + uploadError.message);
 
         const { data: urlData } = supabase.storage
           .from('foto-tamu')
@@ -134,50 +138,88 @@ export default function FormInput({ onDataSubmitted }) {
 
       if (dbError) throw dbError;
 
-      alert('Berhasil menyimpan data tamu!');
+      // Pop-up Sukses Simpan Data
+      setSuccessMessage('Data tamu berhasil disimpan!');
 
       setFormData({
         nama_tamu: '',
         instansi_asal: '',
         no_hp: '',
-        tujuan_bidang: '',
+        tujuan_bidang: 'Sekretariat',
         perihal: ''
       });
       setImageFile(null);
       setImagePreview(null);
 
-      // Reset elemen input file fisik
       const fileInput = document.querySelector('input[type="file"]');
       if (fileInput) fileInput.value = '';
 
       fetchGuests();
-      if (onDataSubmitted) onDataSubmitted();
     } catch (err) {
-      alert(err.message || 'Terjadi kesalahan saat menyimpan data.');
+      alert(err.message || 'Terjadi kesalahan saat menyimpan.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Check-Out Tamu
-  const handleCheckout = async (id, namaTamu) => {
-    if (!window.confirm(`Proses Check-Out untuk ${namaTamu}?`)) return;
+  // Eksekusi Check-out Tamu
+  const confirmCheckout = async () => {
+    if (!checkoutTarget) return;
 
     const checkOutTime = new Date().toISOString();
     const { error } = await supabase
       .from('tamu')
       .update({ status: 'completed', check_out_at: checkOutTime })
-      .eq('id', id);
+      .eq('id', checkoutTarget.id);
 
     if (error) {
       alert('Gagal check-out: ' + error.message);
     } else {
+      setSuccessMessage(`Tamu "${checkoutTarget.nama_tamu}" berhasil check-out.`);
+      setCheckoutTarget(null);
       fetchGuests();
-      if (onDataSubmitted) onDataSubmitted();
     }
   };
 
-  // Hitung Data untuk Paginasi
+  // Hapus Data Tamu (Hanya untuk Admin)
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    const { error } = await supabase.from('tamu').delete().eq('id', deleteTarget.id);
+
+    if (error) {
+      alert('Gagal menghapus data: ' + error.message);
+    } else {
+      setSuccessMessage(`Data tamu "${deleteTarget.nama_tamu}" berhasil dihapus.`);
+      setDeleteTarget(null);
+      fetchGuests();
+    }
+  };
+
+  // Export Data Excel (Hanya untuk Admin)
+  const handleExportExcel = () => {
+    if (filteredGuests.length === 0) {
+      alert('Tidak ada data untuk di-export.');
+      return;
+    }
+
+    const dataToExport = filteredGuests.map((g, idx) => ({
+      No: idx + 1,
+      'Nama Tamu': g.nama_tamu,
+      'Instansi Asal': g.instansi_asal,
+      'No. HP': g.no_hp,
+      'Tujuan Bidang': g.tujuan_bidang,
+      'Perihal': g.perihal,
+      'Masuk': new Date(g.created_at).toLocaleString('id-ID'),
+      'Keluar': g.check_out_at ? new Date(g.check_out_at).toLocaleString('id-ID') : '-',
+      Status: g.status === 'active' ? 'Berkunjung' : 'Selesai'
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Data Tamu');
+    XLSX.writeFile(workbook, `Buku_Tamu_Dishub_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredGuests.slice(indexOfFirstItem, indexOfLastItem);
@@ -185,7 +227,7 @@ export default function FormInput({ onDataSubmitted }) {
 
   return (
     <div className="form-input-container">
-      {/* SEBELAH KIRI: FORM PENCATATAN TAMU BARU */}
+      {/* KIRI: FORM PENCATATAN TAMU BARU */}
       <div className="form-card">
         <h2 className="form-title">Pencatatan Tamu Baru</h2>
         
@@ -195,7 +237,7 @@ export default function FormInput({ onDataSubmitted }) {
             <input
               type="text"
               name="nama_tamu"
-              placeholder="Contoh: Budi Santoso"
+              placeholder="Contoh: Alvin Andriansyah"
               value={formData.nama_tamu}
               onChange={handleChange}
               required
@@ -207,7 +249,7 @@ export default function FormInput({ onDataSubmitted }) {
             <input
               type="text"
               name="instansi_asal"
-              placeholder="Contoh: Dinas Pertanian"
+              placeholder="-"
               value={formData.instansi_asal}
               onChange={handleChange}
               required
@@ -234,7 +276,7 @@ export default function FormInput({ onDataSubmitted }) {
               onChange={handleChange}
               required
             >
-              <option value="">Sekretariat</option>
+              <option value="Sekretariat">Sekretariat</option>
               <option value="Sub Bagian Umum Dan Kepegawaian">Sub Bagian Umum Dan Kepegawaian</option>
               <option value="Sub Bagian Keuangan Dan Penyusunan Program">Sub Bagian Keuangan Dan Penyusunan Program</option>
               <option value="Bidang Angkutan">Bidang Angkutan</option>
@@ -253,7 +295,6 @@ export default function FormInput({ onDataSubmitted }) {
             <label>Perihal / Maksud Kunjungan *</label>
             <textarea
               name="perihal"
-              placeholder="Contoh: Rapat koordinasi dinas"
               value={formData.perihal}
               onChange={handleChange}
               rows="3"
@@ -284,9 +325,17 @@ export default function FormInput({ onDataSubmitted }) {
         </form>
       </div>
 
-      {/* SEBELAH KANAN: TABEL DAFTAR TAMU AKTIF & RIWAYAT */}
+      {/* KANAN: TABEL DAFTAR TAMU AKTIF & RIWAYAT */}
       <div className="table-card-right">
-        <h2 className="form-title">Daftar Tamu Aktif & Riwayat</h2>
+        <div className="table-card-header">
+          <h2 className="form-title">Daftar Tamu Aktif & Riwayat</h2>
+          {/* Tombol Export Excel khusus Admin */}
+          {isAdmin && (
+            <button className="btn-export-excel-small" onClick={handleExportExcel}>
+              Export Excel
+            </button>
+          )}
+        </div>
 
         {/* Filter Baris Atas */}
         <div className="filter-row-input">
@@ -340,7 +389,13 @@ export default function FormInput({ onDataSubmitted }) {
                   <tr key={guest.id}>
                     <td>
                       {guest.foto_url ? (
-                        <img src={guest.foto_url} alt={guest.nama_tamu} className="table-avatar" />
+                        <img
+                          src={guest.foto_url}
+                          alt={guest.nama_tamu}
+                          className="table-avatar clickable-avatar"
+                          onClick={() => setPreviewImage(guest.foto_url)}
+                          title="Klik untuk memperbesar"
+                        />
                       ) : (
                         <div className="no-avatar-cell">No Pic</div>
                       )}
@@ -356,13 +411,11 @@ export default function FormInput({ onDataSubmitted }) {
                     </td>
                     <td>
                       <div className="time-details">
-                        <span>
-                          <strong>Masuk:</strong> {new Date(guest.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
-                        </span>
+                        <span><strong>Masuk:</strong> {new Date(guest.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB</span>
                         {guest.check_out_at && (
                           <span className="time-out-text">
                             <strong>Keluar:</strong> {new Date(guest.check_out_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
-                          </span> 
+                          </span>
                         )}
                       </div>
                     </td>
@@ -372,14 +425,26 @@ export default function FormInput({ onDataSubmitted }) {
                       </span>
                     </td>
                     <td>
-                      {guest.status === 'active' && (
-                        <button
-                          className="btn-checkout-table"
-                          onClick={() => handleCheckout(guest.id, guest.nama_tamu)}
-                        >
-                          Check-Out
-                        </button>
-                      )}
+                      <div className="action-buttons-cell">
+                        {guest.status === 'active' && (
+                          <button
+                            className="btn-checkout-table"
+                            onClick={() => setCheckoutTarget(guest)}
+                          >
+                            Check-Out
+                          </button>
+                        )}
+
+                        {/* Tombol Hapus khusus Admin */}
+                        {isAdmin && (
+                          <button
+                            className="btn-delete-table"
+                            onClick={() => setDeleteTarget(guest)}
+                          >
+                            Hapus
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -413,6 +478,67 @@ export default function FormInput({ onDataSubmitted }) {
           </div>
         )}
       </div>
+
+      {/* MODAL KONFIRMASI CHECK-OUT */}
+      {checkoutTarget && (
+        <div className="modal-overlay" onClick={() => setCheckoutTarget(null)}>
+          <div className="delete-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '8px' }}>🚪</div>
+            <h3 style={{ margin: '0 0 8px 0', color: '#1e3a8a' }}>Konfirmasi Check-Out</h3>
+            <p style={{ margin: '0 0 20px 0', color: '#475569' }}>
+              Proses Check-Out untuk tamu <strong>"{checkoutTarget.nama_tamu}"</strong>?
+            </p>
+            <div className="delete-modal-actions">
+              <button className="btn-cancel" onClick={() => setCheckoutTarget(null)}>
+                Batal
+              </button>
+              <button className="btn-confirm-delete" style={{ backgroundColor: '#10b981' }} onClick={confirmCheckout}>
+                Ya, Check-Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL KONFIRMASI HAPUS (KHUSUS ADMIN) */}
+      {deleteTarget && (
+        <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
+          <div className="delete-modal-card" onClick={(e) => e.stopPropagation()}>
+            <h3>⚠️ Konfirmasi Hapus Data</h3>
+            <p>Apakah Anda yakin ingin menghapus data kunjungan dari <strong>"{deleteTarget.nama_tamu}"</strong>?</p>
+            <div className="delete-modal-actions">
+              <button className="btn-cancel" onClick={() => setDeleteTarget(null)}>Batal</button>
+              <button className="btn-confirm-delete" onClick={confirmDelete}>Ya, Hapus Data</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL PREVIEW FOTO TAMU (KLIK GAMBAR) */}
+      {previewImage && (
+        <div className="image-preview-overlay" onClick={() => setPreviewImage(null)}>
+          <div className="image-preview-content" onClick={(e) => e.stopPropagation()}>
+            <button className="preview-close-btn" onClick={() => setPreviewImage(null)}>
+              &times;
+            </button>
+            <img src={previewImage} alt="Preview Foto Tamu" className="preview-full-img" />
+          </div>
+        </div>
+      )}
+
+      {/* MODAL NOTIFIKASI SUKSES */}
+      {successMessage && (
+        <div className="modal-overlay" onClick={() => setSuccessMessage(null)}>
+          <div className="success-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="success-icon-badge">✅</div>
+            <h3 className="success-modal-title">Berhasil!</h3>
+            <p className="success-modal-text">{successMessage}</p>
+            <button className="btn-success-ok" onClick={() => setSuccessMessage(null)}>
+              Selesai
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

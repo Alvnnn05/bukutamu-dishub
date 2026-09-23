@@ -11,7 +11,6 @@ import './App.css';
 import logoApp from './assets/guesthub.png'; 
 
 const ADMIN_EMAILS = [
-  'hermanbsa1999@gmail.com',
   'vinandrian05@gmail.com'
 ];
 

@@ -19,6 +19,7 @@
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border: 1px solid #e2e8f0;
+  box-sizing: border-box;
 }
 
 .form-title {
@@ -60,6 +61,7 @@
   outline: none;
   font-family: inherit;
   transition: border-color 0.2s;
+  box-sizing: border-box;
 }
 
 .form-group input:focus,
@@ -106,6 +108,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border: 1px solid #e2e8f0;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .table-card-header {
@@ -145,6 +148,7 @@
   padding: 8px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
+  box-sizing: border-box;
 }
 
 .filter-select-right,
@@ -154,6 +158,7 @@
   padding: 8px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
+  box-sizing: border-box;
 }
 
 /* Tabel Responsive & Avatar */
@@ -289,7 +294,7 @@
   background-color: #dc2626;
 }
 
-/* Paginasi */
+/* Paginasi (Perbaikan Hover Tombol) */
 .pagination-container-right {
   display: flex;
   justify-content: space-between;
@@ -302,17 +307,29 @@
 .pagination-buttons-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .pagination-buttons-right button {
-  padding: 6px 12px;
+  padding: 6px 14px;
   border: 1px solid #cbd5e1;
   background: #ffffff;
+  color: #1e3a8a;
   border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.82rem;
   cursor: pointer;
+  transition: all 0.2s ease-in-out; /* Animasi halus saat hover */
 }
 
+/* Efek Hover Tombol Paginasi */
+.pagination-buttons-right button:hover:not(:disabled) {
+  background-color: #e49707;
+  color: #ffffff;
+  border-color: #cbd5e1;
+}
+
+/* State Disabled (Tombol Mati) */
 .pagination-buttons-right button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -378,6 +395,7 @@
   width: 90%;
   text-align: center;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
 }
 
 .delete-modal-actions {
@@ -427,6 +445,7 @@
   text-align: center;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-sizing: border-box;
 }
 
 /* Badge Ikon Centang */

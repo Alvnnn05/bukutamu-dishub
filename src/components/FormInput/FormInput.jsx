@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import React, { useMemo } from 'react';
 import * as XLSX from 'xlsx';
 import './FormInput.css';
 
 export default function FormInput({ userSession, isAdmin }) {
+  // State Form Pencatatan Baru
   const [formData, setFormData] = useState({
     nama_tamu: '',
     instansi_asal: '',
@@ -21,11 +23,25 @@ export default function FormInput({ userSession, isAdmin }) {
   const [filteredGuests, setFilteredGuests] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [bidangFilter, setBidangFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('');
 
   // State Modal Hapus & Check-out
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [checkoutTarget, setCheckoutTarget] = useState(null);
+
+  // State Modal Edit Data Tamu
+  const [editingGuest, setEditingGuest] = useState(null); // Objek tamu yang sedang di-edit
+  const [editFormData, setEditFormData] = useState({
+    nama_tamu: '',
+    instansi_asal: '',
+    no_hp: '',
+    tujuan_bidang: 'Sekretariat',
+    perihal: ''
+  });
+  const [editImageFile, setEditImageFile] = useState(null);
+  const [editImagePreview, setEditImagePreview] = useState(null);
+  const [editLoading, setEditLoading] = useState(false);
 
   // State Notifikasi Sukses
   const [successMessage, setSuccessMessage] = useState(null);
@@ -36,6 +52,14 @@ export default function FormInput({ userSession, isAdmin }) {
   // State Paginasi (5 Data per Halaman)
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  // FUNGSI RESET SELURUH FILTER
+  const handleResetFilter = () => {
+    setSearchTerm('');
+    setStatusFilter('all');
+    setBidangFilter('all');
+    setDateFilter('');
+  };
 
   const fetchGuests = async () => {
     const { data, error } = await supabase
@@ -50,6 +74,49 @@ export default function FormInput({ userSession, isAdmin }) {
     }
   };
 
+  const summaryStats = useMemo(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+
+    // 1. Tamu Hari Ini
+    const todayGuests = guests.filter(g => g.created_at && g.created_at.startsWith(todayStr));
+
+    // 2. Sedang Berkunjung (Status Active / Belum Checkout)
+    const activeGuests = guests.filter(g => g.status === 'active' || !g.check_out_at);
+
+    // 3. Total Bulan Ini
+    const monthGuests = guests.filter(g => {
+      if (!g.created_at) return false;
+      const d = new Date(g.created_at);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    });
+
+    // 4. Tujuan Bidang / Unit Kerja Terbanyak Bulan Ini
+    const unitCounts = {};
+    monthGuests.forEach(g => {
+      const unit = g.tujuan_bidang || 'Lainnya';
+      unitCounts[unit] = (unitCounts[unit] || 0) + 1;
+    });
+
+    let topUnit = '-';
+    let topUnitCount = 0;
+    Object.entries(unitCounts).forEach(([unit, count]) => {
+      if (count > topUnitCount) {
+        topUnit = unit;
+        topUnitCount = count;
+      }
+    });
+
+    return {
+      todayCount: todayGuests.length,
+      activeCount: activeGuests.length,
+      monthCount: monthGuests.length,
+      topUnitName: topUnit,
+      topUnitCount: topUnitCount
+    };
+  }, [guests]);
+
   useEffect(() => {
     fetchGuests();
 
@@ -63,9 +130,11 @@ export default function FormInput({ userSession, isAdmin }) {
     };
   }, []);
 
+  // LOGIKA PENYARINGAN DATA TABEL
   useEffect(() => {
     let result = guests;
 
+    // 1. Search Bar Teks (Nama / Instansi)
     if (searchTerm) {
       result = result.filter(
         (g) =>
@@ -74,10 +143,17 @@ export default function FormInput({ userSession, isAdmin }) {
       );
     }
 
+    // 2. Filter Status Kunjungan
     if (statusFilter !== 'all') {
       result = result.filter((g) => g.status === statusFilter);
     }
 
+    // 3. Filter Tujuan Bidang / Unit Kerja
+    if (bidangFilter !== 'all') {
+      result = result.filter((g) => g.tujuan_bidang === bidangFilter);
+    }
+
+    // 4. Filter Tanggal
     if (dateFilter) {
       result = result.filter((g) => {
         const guestDate = new Date(g.created_at).toISOString().split('T')[0];
@@ -87,7 +163,7 @@ export default function FormInput({ userSession, isAdmin }) {
 
     setFilteredGuests(result);
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, dateFilter, guests]);
+  }, [searchTerm, statusFilter, bidangFilter, dateFilter, guests]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -101,6 +177,7 @@ export default function FormInput({ userSession, isAdmin }) {
     }
   };
 
+  // Submit Simpan Tamu Baru
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -138,7 +215,6 @@ export default function FormInput({ userSession, isAdmin }) {
 
       if (dbError) throw dbError;
 
-      // Pop-up Sukses Simpan Data
       setSuccessMessage('Data tamu berhasil disimpan!');
 
       setFormData({
@@ -159,6 +235,79 @@ export default function FormInput({ userSession, isAdmin }) {
       alert(err.message || 'Terjadi kesalahan saat menyimpan.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // HANDLER FITUR EDIT TAMU
+  const handleOpenEdit = (guest) => {
+    setEditingGuest(guest);
+    setEditFormData({
+      nama_tamu: guest.nama_tamu || '',
+      instansi_asal: guest.instansi_asal || '',
+      no_hp: guest.no_hp || '',
+      tujuan_bidang: guest.tujuan_bidang || 'Sekretariat',
+      perihal: guest.perihal || ''
+    });
+    setEditImageFile(null);
+    setEditImagePreview(guest.foto_url || null);
+  };
+
+  const handleEditChange = (e) => {
+    setEditFormData({ ...editFormData, [e.target.name]: e.target.value });
+  };
+
+  const handleEditImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setEditImageFile(file);
+      setEditImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    if (!editingGuest) return;
+    setEditLoading(true);
+
+    try {
+      let new_foto_url = editingGuest.foto_url;
+
+      // Jika user memilih file foto baru saat edit
+      if (editImageFile) {
+        const fileExt = editImageFile.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const filePath = `tamu/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('foto-tamu')
+          .upload(filePath, editImageFile);
+
+        if (uploadError) throw new Error('Gagal unggah foto baru: ' + uploadError.message);
+
+        const { data: urlData } = supabase.storage
+          .from('foto-tamu')
+          .getPublicUrl(filePath);
+
+        new_foto_url = urlData.publicUrl;
+      }
+
+      const { error: updateError } = await supabase
+        .from('tamu')
+        .update({
+          ...editFormData,
+          foto_url: new_foto_url
+        })
+        .eq('id', editingGuest.id);
+
+      if (updateError) throw updateError;
+
+      setSuccessMessage(`Data tamu "${editFormData.nama_tamu}" berhasil diperbarui!`);
+      setEditingGuest(null);
+      fetchGuests();
+    } catch (err) {
+      alert(err.message || 'Gagal memperbarui data tamu.');
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -226,258 +375,472 @@ export default function FormInput({ userSession, isAdmin }) {
   const totalPages = Math.ceil(filteredGuests.length / itemsPerPage);
 
   return (
-    <div className="form-input-container">
-      {/* KIRI: FORM PENCATATAN TAMU BARU */}
-      <div className="form-card">
-        <h2 className="form-title">Pencatatan Tamu Baru</h2>
-        
-        <form onSubmit={handleSubmit} className="guest-form">
-          <div className="form-group">
-            <label>Nama Lengkap Tamu *</label>
-            <input
-              type="text"
-              name="nama_tamu"
-              placeholder="Contoh: Alvin Andriansyah"
-              value={formData.nama_tamu}
-              onChange={handleChange}
-              required
-            />
+    <div className="form-input-wrapper" style={{ width: '100%', maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}>
+      
+      {/* 4 SUMMARY CARDS DI PALING ATAS */}
+      <div className="summary-cards-grid">
+        {/* Card 1: Tamu Hari Ini */}
+        <div className="summary-card card-yellow-border">
+          <div className="card-header-content">
+            <div>
+              <span className="card-title">Tamu Hari Ini</span>
+              <h3 className="card-value">{summaryStats.todayCount}</h3>
+            </div>
+            <div className="card-icon-badge bg-badge-orange">👥</div>
           </div>
-
-          <div className="form-group">
-            <label>Instansi / Lembaga Asal *</label>
-            <input
-              type="text"
-              name="instansi_asal"
-              placeholder="-"
-              value={formData.instansi_asal}
-              onChange={handleChange}
-              required
-            />
+          <div className="card-footer-text text-green">
+            ▲ Hari ini
           </div>
+        </div>
 
-          <div className="form-group">
-            <label>Nomor Telepon / WA *</label>
-            <input
-              type="text"
-              name="no_hp"
-              placeholder="08123456789"
-              value={formData.no_hp}
-              onChange={handleChange}
-              required
-            />
+        {/* Card 2: Sedang Berkunjung */}
+        <div className="summary-card card-orange-border">
+          <div className="card-header-content">
+            <div>
+              <span className="card-title">Sedang Berkunjung</span>
+              <h3 className="card-value">{summaryStats.activeCount}</h3>
+            </div>
+            <div className="card-icon-badge bg-badge-yellow">🕒</div>
           </div>
-
-          <div className="form-group">
-            <label>Tujuan Bidang / Unit Kerja *</label>
-            <select
-              name="tujuan_bidang"
-              value={formData.tujuan_bidang}
-              onChange={handleChange}
-              required
-            >
-              <option value="Sekretariat">Sekretariat</option>
-              <option value="Sub Bagian Umum Dan Kepegawaian">Sub Bagian Umum Dan Kepegawaian</option>
-              <option value="Sub Bagian Keuangan Dan Penyusunan Program">Sub Bagian Keuangan Dan Penyusunan Program</option>
-              <option value="Bidang Angkutan">Bidang Angkutan</option>
-              <option value="Seksi Angkutan Orang">Seksi Angkutan Orang</option>
-              <option value="Seksi Angkutan Barang">Seksi Angkutan Barang</option>
-              <option value="Bidang Lalu Lintas, Sarana, Prasarana">Bidang Lalu Lintas, Sarana, Prasarana</option>
-              <option value="Seksi Parkir">Seksi Parkir</option>
-              <option value="Seksi Manajemen Rekayasa Lalu Lintas">Seksi Manajemen Rekayasa Lalu Lintas</option>
-              <option value="Seksi Penerangan Jalan Umum">Seksi Penerangan Jalan Umum</option>
-              <option value="Bidang Pengendalian Operasional Lalu Lintas Dan Angkutan Jalan">Bidang Pengendalian Operasional Lalu Lintas Dan Angkutan Jalan</option>
-              <option value="UPT Pengujian Kendaraan Bermotor">UPT Pengujian Kendaraan Bermotor</option>
-            </select>
+          <div className="card-footer-text text-sub">
+            belum checkout
           </div>
+        </div>
 
-          <div className="form-group">
-            <label>Perihal / Maksud Kunjungan *</label>
-            <textarea
-              name="perihal"
-              value={formData.perihal}
-              onChange={handleChange}
-              rows="3"
-              required
-            />
+        {/* Card 3: Total Bulan Ini */}
+        <div className="summary-card card-green-border">
+          <div className="card-header-content">
+            <div>
+              <span className="card-title">Total Bulan Ini</span>
+              <h3 className="card-value">{summaryStats.monthCount}</h3>
+            </div>
+            <div className="card-footer-text text-sub">
+              per {new Date().toLocaleDateString('id-ID', { month: 'short', year: 'numeric' })}
+            </div>
           </div>
+        </div>
 
-          <div className="form-group">
-            <label>Foto Tamu (Ambil via Kamera / Upload) *</label>
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handleImageChange}
-              required
-            />
-            
-            {imagePreview && (
-              <div className="image-preview-container">
-                <img src={imagePreview} alt="Preview Foto Tamu" className="image-preview" />
-              </div>
+        {/* Card 4: Tujuan Bidang Terbanyak */}
+        <div className="summary-card card-blue-border">
+          <div className="card-header-content">
+            <div>
+              <span className="card-title">Bidang Terbanyak</span>
+              <h3 className="card-value text-truncate">{summaryStats.topUnitName}</h3>
+            </div>
+            <div className="card-icon-badge bg-badge-blue">🏢</div>
+          </div>
+          <div className="card-footer-text text-sub">
+            {summaryStats.topUnitCount} kunjungan bulan ini
+          </div>
+        </div>
+      </div>
+
+      {/* CONTAINER LAYOUT KIRI (FORM) & KANAN (TABEL) */}
+      <div className="form-input-container" style={{ padding: '0' }}>
+        {/* KIRI: FORM PENCATATAN TAMU BARU */}
+        <div className="form-card">
+          <h2 className="form-title">Pencatatan Tamu Baru</h2>
+          
+          <form onSubmit={handleSubmit} className="guest-form">
+            <div className="form-group">
+              <label>Nama Lengkap Tamu *</label>
+              <input
+                type="text"
+                name="nama_tamu"
+                placeholder="Contoh: Alvin Andriansyah"
+                value={formData.nama_tamu}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Instansi / Lembaga Asal *</label>
+              <input
+                type="text"
+                name="instansi_asal"
+                placeholder="-"
+                value={formData.instansi_asal}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Nomor Telepon / WA *</label>
+              <input
+                type="text"
+                name="no_hp"
+                placeholder="08123456789"
+                value={formData.no_hp}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Tujuan Bidang / Unit Kerja *</label>
+              <select
+                name="tujuan_bidang"
+                value={formData.tujuan_bidang}
+                onChange={handleChange}
+                required
+              >
+                <option value="Sekretariat">Sekretariat</option>
+                <option value="Sub Bagian Umum Dan Kepegawaian">Sub Bagian Umum Dan Kepegawaian</option>
+                <option value="Sub Bagian Keuangan Dan Penyusunan Program">Sub Bagian Keuangan Dan Penyusunan Program</option>
+                <option value="Bidang Angkutan">Bidang Angkutan</option>
+                <option value="Seksi Angkutan Orang">Seksi Angkutan Orang</option>
+                <option value="Seksi Angkutan Barang">Seksi Angkutan Barang</option>
+                <option value="Bidang Lalu Lintas, Sarana, Prasarana">Bidang Lalu Lintas, Sarana, Prasarana</option>
+                <option value="Seksi Parkir">Seksi Parkir</option>
+                <option value="Seksi Manajemen Rekayasa Lalu Lintas">Seksi Manajemen Rekayasa Lalu Lintas</option>
+                <option value="Seksi Penerangan Jalan Umum">Seksi Penerangan Jalan Umum</option>
+                <option value="Bidang Pengendalian Operasional Lalu Lintas Dan Angkutan Jalan">Bidang Pengendalian Operasional Lalu Lintas Dan Angkutan Jalan</option>
+                <option value="UPT Pengujian Kendaraan Bermotor">UPT Pengujian Kendaraan Bermotor</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Perihal / Maksud Kunjungan *</label>
+              <textarea
+                name="perihal"
+                value={formData.perihal}
+                onChange={handleChange}
+                rows="3"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Foto Tamu (Ambil via Kamera / Upload) *</label>
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleImageChange}
+                required
+              />
+              
+              {imagePreview && (
+                <div className="image-preview-container">
+                  <img src={imagePreview} alt="Preview Foto Tamu" className="image-preview" />
+                </div>
+              )}
+            </div>
+
+            <button type="submit" className="btn-submit" disabled={loading}>
+              {loading ? 'Menyimpan...' : 'Simpan Data Tamu'}
+            </button>
+          </form>
+        </div>
+
+        {/* KANAN: TABEL DAFTAR TAMU AKTIF & RIWAYAT */}
+        <div className="table-card-right">
+          <div className="table-card-header">
+            <h2 className="form-title">Daftar Tamu Aktif & Riwayat</h2>
+            {/* Tombol Export Excel khusus Admin */}
+            {isAdmin && (
+              <button className="btn-export-excel-small" onClick={handleExportExcel}>
+                Export Excel
+              </button>
             )}
           </div>
 
-          <button type="submit" className="btn-submit" disabled={loading}>
-            {loading ? 'Menyimpan...' : 'Simpan Data Tamu'}
-          </button>
-        </form>
-      </div>
+          {/* Filter Baris Atas & Bawah */}
+          <div className="filter-container-wrapper">
+            {/* Baris 1: Search Bar, Filter Status, & Tanggal */}
+            <div className="filter-row-top">
+              <input
+                type="text"
+                className="search-input-right"
+                placeholder="Cari Nama / Instansi..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
 
-      {/* KANAN: TABEL DAFTAR TAMU AKTIF & RIWAYAT */}
-      <div className="table-card-right">
-        <div className="table-card-header">
-          <h2 className="form-title">Daftar Tamu Aktif & Riwayat</h2>
-          {/* Tombol Export Excel khusus Admin */}
-          {isAdmin && (
-            <button className="btn-export-excel-small" onClick={handleExportExcel}>
-              Export Excel
-            </button>
-          )}
-        </div>
-
-        {/* Filter Baris Atas */}
-        <div className="filter-row-input">
-          <input
-            type="text"
-            className="search-input-right"
-            placeholder="Cari Nama / Instansi..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-
-          <select
-            className="filter-select-right"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="all">Semua Status</option>
-            <option value="active">Berkunjung</option>
-            <option value="completed">Selesai</option>
-          </select>
-
-          <input
-            type="date"
-            className="filter-date-right"
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-          />
-        </div>
-
-        {/* Tabel Data Tamu */}
-        <div className="table-responsive-right">
-          <table className="guest-table-right">
-            <thead>
-              <tr>
-                <th>Foto</th>
-                <th>Nama & Kontak</th>
-                <th>Instansi Asal</th>
-                <th>Tujuan & Perihal</th>
-                <th>Waktu Kunjungan</th>
-                <th>Status</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentItems.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="empty-row-right">Data tidak ditemukan.</td>
-                </tr>
-              ) : (
-                currentItems.map((guest) => (
-                  <tr key={guest.id}>
-                    <td>
-                      {guest.foto_url ? (
-                        <img
-                          src={guest.foto_url}
-                          alt={guest.nama_tamu}
-                          className="table-avatar clickable-avatar"
-                          onClick={() => setPreviewImage(guest.foto_url)}
-                          title="Klik untuk memperbesar"
-                        />
-                      ) : (
-                        <div className="no-avatar-cell">No Pic</div>
-                      )}
-                    </td>
-                    <td>
-                      <strong>{guest.nama_tamu}</strong>
-                      <div className="sub-detail">{guest.no_hp}</div>
-                    </td>
-                    <td>{guest.instansi_asal}</td>
-                    <td>
-                      <strong>{guest.tujuan_bidang}</strong>
-                      <div className="sub-detail">{guest.perihal}</div>
-                    </td>
-                    <td>
-                      <div className="time-details">
-                        <span><strong>Masuk:</strong> {new Date(guest.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB</span>
-                        {guest.check_out_at && (
-                          <span className="time-out-text">
-                            <strong>Keluar:</strong> {new Date(guest.check_out_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`status-pill ${guest.status}`}>
-                        {guest.status === 'active' ? 'Berkunjung' : 'Selesai'}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="action-buttons-cell">
-                        {guest.status === 'active' && (
-                          <button
-                            className="btn-checkout-table"
-                            onClick={() => setCheckoutTarget(guest)}
-                          >
-                            Check-Out
-                          </button>
-                        )}
-
-                        {/* Tombol Hapus khusus Admin */}
-                        {isAdmin && (
-                          <button
-                            className="btn-delete-table"
-                            onClick={() => setDeleteTarget(guest)}
-                          >
-                            Hapus
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* NAVIGASI PAGINASI */}
-        {filteredGuests.length > 0 && (
-          <div className="pagination-container-right">
-            <span className="pagination-info-right">
-              Menampilkan {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredGuests.length)} dari {filteredGuests.length} data
-            </span>
-
-            <div className="pagination-buttons-right">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((prev) => prev - 1)}
+              <select
+                className="filter-select-right"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
               >
-                &laquo; Prev
-              </button>
-              <span>Halaman {currentPage} dari {totalPages || 1}</span>
-              <button
-                disabled={currentPage === totalPages || totalPages === 0}
-                onClick={() => setCurrentPage((prev) => prev + 1)}
+                <option value="all">Semua Status</option>
+                <option value="active">Berkunjung</option>
+                <option value="completed">Selesai</option>
+              </select>
+
+              <input
+                type="date"
+                className="filter-date-right"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+              />
+            </div>
+
+            {/* Baris 2: Dropdown Filter Tujuan Bidang & Tombol Reset */}
+            <div className="filter-row-bottom">
+              <select
+                className="filter-select-bidang-full"
+                value={bidangFilter}
+                onChange={(e) => setBidangFilter(e.target.value)}
               >
-                Next &raquo;
+                <option value="all">-- Semua Tujuan Bidang / Unit Kerja --</option>
+                <option value="Sekretariat">Sekretariat</option>
+                <option value="Sub Bagian Umum Dan Kepegawaian">Sub Bagian Umum Dan Kepegawaian</option>
+                <option value="Sub Bagian Keuangan Dan Penyusunan Program">Sub Bagian Keuangan Dan Penyusunan Program</option>
+                <option value="Bidang Angkutan">Bidang Angkutan</option>
+                <option value="Seksi Angkutan Orang">Seksi Angkutan Orang</option>
+                <option value="Seksi Angkutan Barang">Seksi Angkutan Barang</option>
+                <option value="Bidang Lalu Lintas, Sarana, Prasarana">Bidang Lalu Lintas, Sarana, Prasarana</option>
+                <option value="Seksi Parkir">Seksi Parkir</option>
+                <option value="Seksi Manajemen Rekayasa Lalu Lintas">Seksi Manajemen Rekayasa Lalu Lintas</option>
+                <option value="Seksi Penerangan Jalan Umum">Seksi Penerangan Jalan Umum</option>
+                <option value="Bidang Pengendalian Operasional Lalu Lintas Dan Angkutan Jalan">Bidang Pengendalian Operasional Lalu Lintas Dan Angkutan Jalan</option>
+                <option value="UPT Pengujian Kendaraan Bermotor">UPT Pengujian Kendaraan Bermotor</option>
+              </select>
+
+              {/* Tombol Reset Filter */}
+              <button 
+                type="button" 
+                className="btn-reset-filter"
+                onClick={handleResetFilter}
+                title="Reset seluruh penyaringan"
+              >
+                Reset
               </button>
             </div>
           </div>
-        )}
+
+          {/* Tabel Data Tamu */}
+          <div className="table-responsive-right">
+            <table className="guest-table-right">
+              <thead>
+                <tr>
+                  <th>Foto</th>
+                  <th>Nama & Kontak</th>
+                  <th>Instansi Asal</th>
+                  <th>Tujuan & Perihal</th>
+                  <th>Waktu Kunjungan</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentItems.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="empty-row-right">Data tidak ditemukan.</td>
+                  </tr>
+                ) : (
+                  currentItems.map((guest) => (
+                    <tr key={guest.id}>
+                      <td>
+                        {guest.foto_url ? (
+                          <img
+                            src={guest.foto_url}
+                            alt={guest.nama_tamu}
+                            className="table-avatar clickable-avatar"
+                            onClick={() => setPreviewImage(guest.foto_url)}
+                            title="Klik untuk memperbesar"
+                          />
+                        ) : (
+                          <div className="no-avatar-cell">No Pic</div>
+                        )}
+                      </td>
+                      <td>
+                        <strong>{guest.nama_tamu}</strong>
+                        <div className="sub-detail">{guest.no_hp}</div>
+                      </td>
+                      <td>{guest.instansi_asal}</td>
+                      <td>
+                        <strong>{guest.tujuan_bidang}</strong>
+                        <div className="sub-detail">{guest.perihal}</div>
+                      </td>
+                      <td>
+                        <div className="time-details">
+                          <span><strong>Masuk:</strong> {new Date(guest.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB</span>
+                          {guest.check_out_at && (
+                            <span className="time-out-text">
+                              <strong>Keluar:</strong> {new Date(guest.check_out_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`status-pill ${guest.status}`}>
+                          {guest.status === 'active' ? 'Berkunjung' : 'Selesai'}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="action-buttons-cell">
+                          {/* Tombol Check-Out */}
+                          {guest.status === 'active' && (
+                            <button
+                              className="btn-checkout-table"
+                              onClick={() => setCheckoutTarget(guest)}
+                            >
+                              Check-Out
+                            </button>
+                          )}
+
+                          {/* Tombol Edit Data Tamu */}
+                          <button
+                            className="btn-edit-table"
+                            onClick={() => handleOpenEdit(guest)}
+                            title="Edit data tamu"
+                          >
+                            Edit
+                          </button>
+
+                          {/* Tombol Hapus khusus Admin */}
+                          {isAdmin && (
+                            <button
+                              className="btn-delete-table"
+                              onClick={() => setDeleteTarget(guest)}
+                            >
+                              Hapus
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* NAVIGASI PAGINASI */}
+          {filteredGuests.length > 0 && (
+            <div className="pagination-container-right">
+              <span className="pagination-info-right">
+                Menampilkan {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredGuests.length)} dari {filteredGuests.length} data
+              </span>
+
+              <div className="pagination-buttons-right">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                >
+                  &laquo; Prev
+                </button>
+                <span>Halaman {currentPage} dari {totalPages || 1}</span>
+                <button
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                >
+                  Next &raquo;
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* MODAL EDIT DATA TAMU */}
+      {editingGuest && (
+        <div className="modal-overlay" onClick={() => setEditingGuest(null)}>
+          <div className="edit-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="edit-modal-header">
+              <h3>✏️ Edit Data Tamu</h3>
+              <button className="edit-modal-close" onClick={() => setEditingGuest(null)}>&times;</button>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="guest-form">
+              <div className="form-group">
+                <label>Nama Lengkap Tamu *</label>
+                <input
+                  type="text"
+                  name="nama_tamu"
+                  value={editFormData.nama_tamu}
+                  onChange={handleEditChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Instansi / Lembaga Asal *</label>
+                <input
+                  type="text"
+                  name="instansi_asal"
+                  value={editFormData.instansi_asal}
+                  onChange={handleEditChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Nomor Telepon / WA *</label>
+                <input
+                  type="text"
+                  name="no_hp"
+                  value={editFormData.no_hp}
+                  onChange={handleEditChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Tujuan Bidang / Unit Kerja *</label>
+                <select
+                  name="tujuan_bidang"
+                  value={editFormData.tujuan_bidang}
+                  onChange={handleEditChange}
+                  required
+                >
+                  <option value="Sekretariat">Sekretariat</option>
+                  <option value="Sub Bagian Umum Dan Kepegawaian">Sub Bagian Umum Dan Kepegawaian</option>
+                  <option value="Sub Bagian Keuangan Dan Penyusunan Program">Sub Bagian Keuangan Dan Penyusunan Program</option>
+                  <option value="Bidang Angkutan">Bidang Angkutan</option>
+                  <option value="Seksi Angkutan Orang">Seksi Angkutan Orang</option>
+                  <option value="Seksi Angkutan Barang">Seksi Angkutan Barang</option>
+                  <option value="Bidang Lalu Lintas, Sarana, Prasarana">Bidang Lalu Lintas, Sarana, Prasarana</option>
+                  <option value="Seksi Parkir">Seksi Parkir</option>
+                  <option value="Seksi Manajemen Rekayasa Lalu Lintas">Seksi Manajemen Rekayasa Lalu Lintas</option>
+                  <option value="Seksi Penerangan Jalan Umum">Seksi Penerangan Jalan Umum</option>
+                  <option value="Bidang Pengendalian Operasional Lalu Lintas Dan Angkutan Jalan">Bidang Pengendalian Operasional Lalu Lintas Dan Angkutan Jalan</option>
+                  <option value="UPT Pengujian Kendaraan Bermotor">UPT Pengujian Kendaraan Bermotor</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Perihal / Maksud Kunjungan *</label>
+                <textarea
+                  name="perihal"
+                  value={editFormData.perihal}
+                  onChange={handleEditChange}
+                  rows="3"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Ganti Foto (Opsional)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleEditImageChange}
+                />
+                
+                {editImagePreview && (
+                  <div className="image-preview-container">
+                    <img src={editImagePreview} alt="Preview Foto Tamu" className="image-preview" />
+                  </div>
+                )}
+              </div>
+
+              <div className="delete-modal-actions">
+                <button type="button" className="btn-cancel" onClick={() => setEditingGuest(null)}>
+                  Batal
+                </button>
+                <button type="submit" className="btn-confirm-delete" style={{ backgroundColor: '#f59e0b' }} disabled={editLoading}>
+                  {editLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* MODAL KONFIRMASI CHECK-OUT */}
       {checkoutTarget && (

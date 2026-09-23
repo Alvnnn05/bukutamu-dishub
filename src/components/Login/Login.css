@@ -6,20 +6,25 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #0d233a 0%, #1a3d60 50%, #e49707 100%) !important;
-  background-attachment: fixed;
-  padding: 20px 16px; /* 👈 Tambahan: memberi jarak aman di pinggir layar HP */
-  box-sizing: border-box; /* 👈 Tambahan: mencegah overflow pada layar sempit */
+  /* Menggunakan gambar background blue.jpg */
+  background: url('../../assets/blue.jpg') no-repeat center center fixed !important;
+  background-size: cover !important;
+  -webkit-background-size: cover !important;
+  padding: 20px 16px;
+  box-sizing: border-box;
 }
 
 /* Card Login */
 .login-card {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.95); /* Putih bersih sedikit transparan */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 14px;
   padding: 35px 35px;
   width: 100%;
   max-width: 480px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   text-align: center;
   box-sizing: border-box;
 }
@@ -33,7 +38,7 @@
 }
 
 .login-logo-img {
-  width: 120px;           
+  width: 120px;          
   height: auto;          
   max-height: 90px;      
   object-fit: contain;
@@ -80,7 +85,7 @@
   font-size: 0.9rem;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
-  box-sizing: border-box; /* 👈 Tambahan: menjaga agar input tidak offscreen di HP */
+  box-sizing: border-box;
 }
 
 .form-group-login input:focus {
@@ -113,15 +118,16 @@
 /* Footer Teks Sederhana di Luar Card */
 .login-footer-text {
   margin-top: 24px;
-  color: rgba(255, 255, 255, 0.7);
+  color: #ffffff;
   font-size: 0.8rem;
   text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 /* MEDIA RESPONSIF UNTUK TAMPILAN HP */
 @media (max-width: 480px) {
   .login-card {
-    padding: 24px 18px; /* Menyelaraskan padding internal agar muat di layar sempit */
+    padding: 24px 18px;
   }
 
   .login-logo-img {
@@ -138,7 +144,11 @@
     margin-bottom: 20px;
   }
 
-  .form-group-login input,
+  .form-group-login input {
+    font-size: 1rem; /* Mencegah auto-zoom di browser HP */
+    padding: 11px 14px;
+  }
+
   .btn-login-submit {
     padding: 11px 14px;
     font-size: 0.95rem;

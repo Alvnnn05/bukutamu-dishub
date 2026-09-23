@@ -9,9 +9,16 @@
 
 body {
 font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-background: linear-gradient(135deg, #172554 0%, #1e3a8a 65%, #e49707 100%);
-background-attachment: fixed;  min-height: 100vh;
-color: #1e293b;
+  
+  /* Path ke gambar background */
+  background: url('./assets/blue.jpg') no-repeat center center fixed;
+  
+  /* KUNCI RESPONSIF HP: Gambar menyesuaikan ukuran layar tanpa melar */
+  background-size: cover;
+  -webkit-background-size: cover;
+  
+  min-height: 100vh;
+  color: #1e293b;
 }
 
 /* App Layout Container */
@@ -24,19 +31,19 @@ color: #1e293b;
 
 /* HEADER / NAVBAR UTAMA */
 .main-header {
-background: rgba(15, 23, 42, 0.65) !important; /* Biru gelap transparan */
-backdrop-filter: blur(12px);                   /* Efek blur kaca */
--webkit-backdrop-filter: blur(12px);
-border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-padding: 14px 28px;
-display: flex;
-justify-content: space-between; /* Mendorong elemen ke ujung kiri dan kanan */
-align-items: center;
-box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-position: sticky;
-top: 0;
-z-index: 100;
-width: 100%;
+  background: rgba(15, 23, 42, 0.65) !important; /* Biru gelap transparan */
+  backdrop-filter: blur(12px);                   /* Efek blur kaca */
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 14px 28px;
+  display: flex;
+  justify-content: space-between; /* Mendorong elemen ke ujung kiri dan kanan */
+  align-items: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
 }
 
 .header-brand {
@@ -80,7 +87,7 @@ width: 100%;
   gap: 12px;
 }
 
-/* Styling Badge Role Kapsul */
+/* Styling Badge Role Kapsul (KODE ASLI KAMU) */
 .role-badge {
   display: inline-flex;
   align-items: center;
@@ -116,41 +123,51 @@ width: 100%;
   border: 1px solid #cbd5e1;
 }
 
-/* Tombol Header (Profil & Logout) */
+/* TOMBOL HEADER TRANSPARAN (GLASSMORPHISM) */
 .btn-header-profile {
-  background-color: #f1f5f9;
-  color: #1E3A8A;
-  border: 1px solid #cbd5e1;
-  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 8px 16px;
   border-radius: 8px;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.2s ease-in-out;
   font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .btn-header-profile:hover {
-  background-color: #e2e8f0;
-  border-color: #94a3b8;
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
 }
 
 .btn-header-logout {
-  background-color: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #fca5a5;
-  padding: 8px 14px;
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  padding: 8px 16px;
   border-radius: 8px;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.2s ease-in-out;
   font-family: inherit;
 }
 
 .btn-header-logout:hover {
-  background-color: #fca5a5;
-  color: #7f1d1d;
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+  transform: translateY(-1px);
 }
 
 /* MAIN CONTENT AREA */
@@ -189,10 +206,10 @@ width: 100%;
   }
 
   .header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
   }
 
   .role-badge,

@@ -9,6 +9,106 @@
   box-sizing: border-box;
 }
 
+/* ========================================== */
+/* SUMMARY CARDS GRID (PALING ATAS DASHBOARD)  */
+/* ========================================== */
+.summary-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  width: 100%;
+  margin-top: 24px;
+  margin-bottom: 24px;
+  box-sizing: border-box;
+}
+
+/* Card Styling Utama */
+.summary-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  box-sizing: border-box;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Akses Warna Border Kiri Kartu */
+.card-yellow-border { border-left: 5px solid #f59e0b !important; }
+.card-orange-border { border-left: 5px solid #d97706 !important; }
+.card-green-border  { border-left: 5px solid #10b981 !important; }
+.card-blue-border   { border-left: 5px solid #2072f4 !important; }
+
+/* Header Dalam Kartu (Teks + Badge Ikon) */
+.card-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.card-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.card-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1e3a8a;
+  margin: 0;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+/* Pemotong Teks Panjang untuk Nama Bidang/Unit Kerja */
+.text-truncate {
+  font-size: 1.1rem; 
+  white-space: normal !important; 
+  overflow: visible !important;
+  text-overflow: clip !important;
+  max-width: 100% !important;
+}
+
+/* Badge Ikon Lingkaran / Rounded */
+.card-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.bg-badge-orange { background-color: #fef3c7; }
+.bg-badge-yellow { background-color: #ffedd5; }
+.bg-badge-green  { background-color: #dcfce7; }
+.bg-badge-blue   { background-color: #e0e7ff; }
+
+/* Teks Keterangan di Bagian Bawah Kartu */
+.card-footer-text {
+  font-size: 0.78rem;
+  margin-top: 12px;
+  font-weight: 600;
+}
+
+.text-green { color: #16a34a; }
+.text-sub   { color: #64748b; }
+
 /* Card Kiri (Form Input) */
 .form-card {
   flex: 1;
@@ -134,31 +234,93 @@
   background-color: #059669;
 }
 
-/* Filter Baris Atas Tabel */
-.filter-row-input {
+/* ========================================== */
+/* FILTER TABEL (2 BARIS + TOMBOL RESET)       */
+/* ========================================== */
+.filter-container-wrapper {
   display: flex;
-  gap: 12px;
+  flex-direction: column;
+  gap: 10px;
   margin-bottom: 20px;
-  flex-wrap: wrap;
+  width: 100%;
+}
+
+/* Baris 1: Search Bar, Status, Tanggal */
+.filter-row-top {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
 }
 
 .search-input-right {
   flex: 2;
-  min-width: 180px;
+  min-width: 160px;
   padding: 8px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
+  font-size: 0.88rem;
   box-sizing: border-box;
 }
 
 .filter-select-right,
 .filter-date-right {
   flex: 1;
-  min-width: 130px;
+  min-width: 120px;
   padding: 8px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
+  font-size: 0.88rem;
   box-sizing: border-box;
+  background-color: #ffffff;
+}
+
+/* Baris 2: Dropdown Bidang & Tombol Reset */
+.filter-row-bottom {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+}
+
+.filter-select-bidang-full {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  background-color: #ffffff;
+  color: #334155;
+  outline: none;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.filter-select-bidang-full:focus {
+  border-color: #1e3a8a;
+}
+
+/* Tombol Reset Filter */
+.btn-reset-filter {
+  background-color: #1e3a8a;
+  color: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-reset-filter:hover {
+  background-color: #e49707;
+  color: #ffffff;
+  border-color: #e49707;
 }
 
 /* Tabel Responsive & Avatar */
@@ -278,6 +440,23 @@
   background-color: #059669;
 }
 
+/* Tombol Edit di Tabel */
+.btn-edit-table {
+  background-color: #f59e0b;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-edit-table:hover {
+  background-color: #d97706;
+}
+
 .btn-delete-table {
   background-color: #ef4444;
   color: white;
@@ -294,7 +473,43 @@
   background-color: #dc2626;
 }
 
-/* Paginasi (Perbaikan Hover Tombol) */
+/* Card Modal Edit Data Tamu */
+.edit-modal-card {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 14px;
+  max-width: 480px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+}
+
+.edit-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.edit-modal-header h3 {
+  margin: 0;
+  color: #1e3a8a;
+  font-size: 1.2rem;
+}
+
+.edit-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #64748b;
+  cursor: pointer;
+}
+
+/* Paginasi */
 .pagination-container-right {
   display: flex;
   justify-content: space-between;
@@ -319,17 +534,15 @@
   font-weight: 600;
   font-size: 0.82rem;
   cursor: pointer;
-  transition: all 0.2s ease-in-out; /* Animasi halus saat hover */
+  transition: all 0.2s ease-in-out;
 }
 
-/* Efek Hover Tombol Paginasi */
 .pagination-buttons-right button:hover:not(:disabled) {
   background-color: #e49707;
   color: #ffffff;
   border-color: #cbd5e1;
 }
 
-/* State Disabled (Tombol Mati) */
 .pagination-buttons-right button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -351,7 +564,6 @@
   backdrop-filter: blur(3px);
 }
 
-/* Card Modal Preview Gambar Pop-up */
 .image-preview-content {
   position: relative;
   background: #ffffff;
@@ -386,7 +598,6 @@
   cursor: pointer;
 }
 
-/* Card Modal Konfirmasi (Hapus & Check-out) */
 .delete-modal-card {
   background: white;
   padding: 24px;
@@ -435,7 +646,6 @@
   background-color: #dc2626;
 }
 
-/* Card Modal Sukses */
 .success-modal-card {
   background: #ffffff;
   padding: 32px 28px;
@@ -448,7 +658,6 @@
   box-sizing: border-box;
 }
 
-/* Badge Ikon Centang */
 .success-icon-badge {
   font-size: 2.2rem;
   width: 64px;
@@ -461,7 +670,6 @@
   margin: 0 auto 16px auto;
 }
 
-/* Judul Modal Sukses */
 .success-modal-title {
   margin: 0 0 8px 0;
   color: #1e3a8a;
@@ -469,7 +677,6 @@
   font-weight: 700;
 }
 
-/* Teks Deskripsi Sukses */
 .success-modal-text {
   margin: 0 0 24px 0;
   color: #64748b;
@@ -477,7 +684,6 @@
   line-height: 1.5;
 }
 
-/* Tombol OK Full Width */
 .btn-success-ok {
   width: 100%;
   background-color: #1e3a8a;
@@ -499,7 +705,6 @@
   transform: scale(0.98);
 }
 
-/* Animasi Pop-in Modal */
 @keyframes popIn {
   from {
     opacity: 0;
@@ -515,19 +720,68 @@
 @media (max-width: 992px) {
   .form-input-container {
     flex-direction: column;
+    padding: 16px;
   }
+  
+  .summary-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
   .form-card,
   .table-card-right {
     max-width: 100%;
     width: 100%;
+    min-width: 0;
   }
 }
 
 /* RESPONSIVE MOBILE (MAX-WIDTH: 768PX) */
 @media (max-width: 768px) {
+  .form-input-wrapper {
+    padding: 0 12px !important;
+  }
+
   .form-input-container {
-    padding: 8px;
+    padding: 0;
     gap: 16px;
+  }
+
+  /* 2 Kartu di Atas, 2 Kartu di Bawah (2x2 Grid) */
+  .summary-cards-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px;
+    margin-top: 12px;
+    margin-bottom: 16px;
+  }
+
+  .summary-card {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .card-title {
+    font-size: 0.72rem;
+  }
+
+  .card-value {
+    font-size: 1.2rem;
+  }
+
+  .text-truncate {
+    font-size: 0.88rem;
+  }
+
+  .card-icon-badge {
+    width: 30px;
+    height: 30px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
+
+  .card-footer-text {
+    font-size: 0.68rem;
+    margin-top: 6px;
   }
 
   .form-card,
@@ -536,7 +790,12 @@
     border-radius: 10px;
   }
 
-  /* Header Tabel + Tombol Export Excel */
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 1rem;
+  }
+
   .table-card-header {
     flex-direction: column;
     align-items: flex-start;
@@ -548,20 +807,27 @@
     text-align: center;
   }
 
-  /* Filter Input Menjadi 1 Kolom Penuh */
-  .filter-row-input {
+  /* Filter Menjadi Vertikal di HP */
+  .filter-row-top {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .filter-row-bottom {
     flex-direction: column;
     gap: 8px;
   }
 
   .search-input-right,
   .filter-select-right,
-  .filter-date-right {
+  .filter-date-right,
+  .filter-select-bidang-full,
+  .btn-reset-filter {
     width: 100%;
     min-width: 100%;
+    justify-content: center;
   }
 
-  /* Paginasi Rapi Vertikal di HP */
   .pagination-container-right {
     flex-direction: column;
     gap: 12px;
@@ -572,5 +838,12 @@
   .pagination-buttons-right {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* LAYOUT 2x2 UNTUK LAYAR SANGAT KECIL */
+@media (max-width: 480px) {
+  .summary-cards-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 }

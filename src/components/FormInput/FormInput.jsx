@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React from 'react';
+import Webcam from 'react-webcam';
 import { supabase } from '../../lib/supabaseClient';
-import React, { useMemo } from 'react';
 import * as XLSX from 'xlsx';
 import './FormInput.css';
 
@@ -17,6 +18,10 @@ export default function FormInput({ userSession, isAdmin }) {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // State & Ref Webcam
+  const webcamRef = useRef(null);
+  const [isCameraActive, setIsCameraActive] = useState(false);
 
   // State Tabel Sisi Kanan (Daftar Tamu + Filter)
   const [guests, setGuests] = useState([]);
@@ -52,6 +57,26 @@ export default function FormInput({ userSession, isAdmin }) {
   // State Paginasi (5 Data per Halaman)
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  // Helper: Konversi dataURL (Base64 dari Webcam) menjadi File Object
+  const urlToFile = async (url, filename, mimeType) => {
+    const res = await fetch(url);
+    const buf = await res.arrayBuffer();
+    return new File([buf], filename, { type: mimeType });
+  };
+
+  // Handler Tangkap Foto dari Webcam
+  const capturePhoto = useCallback(async () => {
+    if (webcamRef.current) {
+      const imageSrc = webcamRef.current.getScreenshot();
+      if (imageSrc) {
+        setImagePreview(imageSrc);
+        const file = await urlToFile(imageSrc, `webcam-${Date.now()}.jpg`, 'image/jpeg');
+        setImageFile(file);
+        setIsCameraActive(false);
+      }
+    }
+  }, [webcamRef]);
 
   // FUNGSI RESET SELURUH FILTER
   const handleResetFilter = () => {
@@ -174,6 +199,7 @@ export default function FormInput({ userSession, isAdmin }) {
     if (file) {
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
+      setIsCameraActive(false);
     }
   };
 
@@ -186,7 +212,7 @@ export default function FormInput({ userSession, isAdmin }) {
       let foto_url = null;
 
       if (imageFile) {
-        const fileExt = imageFile.name.split('.').pop();
+        const fileExt = imageFile.name.split('.').pop() || 'jpg';
         const fileName = `${Date.now()}.${fileExt}`;
         const filePath = `tamu/${fileName}`;
 
@@ -226,6 +252,7 @@ export default function FormInput({ userSession, isAdmin }) {
       });
       setImageFile(null);
       setImagePreview(null);
+      setIsCameraActive(false);
 
       const fileInput = document.querySelector('input[type="file"]');
       if (fileInput) fileInput.value = '';
@@ -274,7 +301,7 @@ export default function FormInput({ userSession, isAdmin }) {
 
       // Jika user memilih file foto baru saat edit
       if (editImageFile) {
-        const fileExt = editImageFile.name.split('.').pop();
+        const fileExt = editImageFile.name.split('.').pop() || 'jpg';
         const fileName = `${Date.now()}.${fileExt}`;
         const filePath = `tamu/${fileName}`;
 
@@ -512,22 +539,85 @@ export default function FormInput({ userSession, isAdmin }) {
               />
             </div>
 
-            <div className="form-group">
-              <label>Foto Tamu (Ambil via Kamera / Upload) *</label>
-              <input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                onChange={handleImageChange}
-                required
-              />
-              
-              {imagePreview && (
-                <div className="image-preview-container">
-                  <img src={imagePreview} alt="Preview Foto Tamu" className="image-preview" />
+            {/* INTEGRASI WEBCAM & INPUT FILE */}
+         <div className="form-group">
+          <label>Foto Tamu (Webcam / Upload File) *</label>
+
+          <div className="photo-input-container">
+            {isCameraActive ? (
+              <div className="webcam-container" style={{ textAlign: 'center' }}>
+                <Webcam
+                  audio={false}
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                  width="100%"
+                  videoConstraints={{ facingMode: 'user' }}
+                  style={{ borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                />
+                <div className="webcam-action-buttons">
+                  <button
+                    type="button"
+                    className="btn-capture-photo"
+                    onClick={capturePhoto}
+                  >
+                     Ambil Foto
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-cancel-webcam"
+                    onClick={() => setIsCameraActive(false)}
+                  >
+                    Batal
+                  </button>
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="photo-input-options">
+                {/* Tombol Kamera */}
+                <button
+                  type="button"
+                  className="btn-webcam-trigger"
+                  onClick={() => setIsCameraActive(true)}
+                >
+                   Buka Kamera
+                </button>
+
+                {/* Custom Upload File Button */}
+                <label htmlFor="guest-photo-upload" className="custom-file-upload">
+                   Pilih File Foto
+                </label>
+                <input
+                  id="guest-photo-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden-file-input"
+                  onChange={handleImageChange}
+                />
+              </div>
+            )}
+
+            {/* Preview Foto */}
+            {imagePreview && !isCameraActive && (
+              <div className="image-preview-container" style={{ textAlign: 'center', marginTop: '8px' }}>
+                <img src={imagePreview} alt="Preview Foto Tamu" className="image-preview" />
+                <div>
+                  <button
+                    type="button"
+                    className="btn-remove-photo"
+                    onClick={() => {
+                      setImagePreview(null);
+                      setImageFile(null);
+                      const fileInput = document.getElementById('guest-photo-upload');
+                      if (fileInput) fileInput.value = '';
+                    }}
+                  >
+                     Hapus Foto
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
             <button type="submit" className="btn-submit" disabled={loading}>
               {loading ? 'Menyimpan...' : 'Simpan Data Tamu'}
@@ -741,7 +831,7 @@ export default function FormInput({ userSession, isAdmin }) {
         <div className="modal-overlay" onClick={() => setEditingGuest(null)}>
           <div className="edit-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="edit-modal-header">
-              <h3>✏️ Edit Data Tamu</h3>
+              <h3> Edit Data Tamu</h3>
               <button className="edit-modal-close" onClick={() => setEditingGuest(null)}>&times;</button>
             </div>
 
@@ -818,7 +908,6 @@ export default function FormInput({ userSession, isAdmin }) {
                 <input
                   type="file"
                   accept="image/*"
-                  capture="environment"
                   onChange={handleEditImageChange}
                 />
                 

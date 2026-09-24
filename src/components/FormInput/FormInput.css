@@ -182,6 +182,148 @@
   object-fit: cover;
 }
 
+/* Styling Modul Kamera & Input Foto */
+.photo-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.photo-input-options {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-webcam-trigger {
+  flex: 1;
+  background-color: #1e3a8a;
+  color: #ffffff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-webcam-trigger:hover {
+  background-color: #e49707;
+}
+
+/* Custom Upload File Input Button */
+.custom-file-upload {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #f8fafc;
+  color: #475569;
+  border: 1px dashed #cbd5e1;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.custom-file-upload:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+/* Sembunyikan Input File Asli Bawaan Browser */
+.hidden-file-input {
+  display: none;
+}
+
+/* Tombol Aksi Kamera Web */
+.webcam-action-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.btn-capture-photo {
+  flex: 1;
+  background-color: #10b981;
+  color: #ffffff;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-capture-photo:hover {
+  background-color: #059669;
+}
+
+.btn-cancel-webcam {
+  background-color: #94a3b8;
+  color: #ffffff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-cancel-webcam:hover {
+  background-color: #64748b;
+}
+
+/* Tombol Hapus Preview Foto */
+.btn-remove-photo {
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
+.btn-remove-photo:hover {
+  background-color: #dc2626;
+}
+
+.btn-remove-photo:active {
+  transform: scale(0.97);
+}
+
+@media (max-width: 480px) {
+  .photo-input-options {
+    flex-direction: column;
+  }
+  .btn-webcam-trigger,
+  .custom-file-upload {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
 .btn-submit {
   background-color: #1e3a8a;
   color: #ffffff;

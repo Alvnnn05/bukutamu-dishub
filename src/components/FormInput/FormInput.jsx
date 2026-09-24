@@ -19,9 +19,10 @@ export default function FormInput({ userSession, isAdmin }) {
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // State & Ref Webcam
+  // State & Ref Modal Kamera
   const webcamRef = useRef(null);
-  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
+  const [tempCameraImage, setTempCameraImage] = useState(null); // Gambar sementara sebelum disetujui
 
   // State Tabel Sisi Kanan (Daftar Tamu + Filter)
   const [guests, setGuests] = useState([]);
@@ -36,7 +37,7 @@ export default function FormInput({ userSession, isAdmin }) {
   const [checkoutTarget, setCheckoutTarget] = useState(null);
 
   // State Modal Edit Data Tamu
-  const [editingGuest, setEditingGuest] = useState(null); // Objek tamu yang sedang di-edit
+  const [editingGuest, setEditingGuest] = useState(null);
   const [editFormData, setEditFormData] = useState({
     nama_tamu: '',
     instansi_asal: '',
@@ -65,18 +66,32 @@ export default function FormInput({ userSession, isAdmin }) {
     return new File([buf], filename, { type: mimeType });
   };
 
-  // Handler Tangkap Foto dari Webcam
-  const capturePhoto = useCallback(async () => {
+  // Tangkap Foto Sementara di Modal Kamera
+  const handleCaptureTemp = useCallback(() => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       if (imageSrc) {
-        setImagePreview(imageSrc);
-        const file = await urlToFile(imageSrc, `webcam-${Date.now()}.jpg`, 'image/jpeg');
-        setImageFile(file);
-        setIsCameraActive(false);
+        setTempCameraImage(imageSrc);
       }
     }
   }, [webcamRef]);
+
+  // Konfirmasi Gunakan Foto dari Modal Kamera
+  const handleConfirmCameraPhoto = async () => {
+    if (tempCameraImage) {
+      setImagePreview(tempCameraImage);
+      const file = await urlToFile(tempCameraImage, `webcam-${Date.now()}.jpg`, 'image/jpeg');
+      setImageFile(file);
+      setIsCameraModalOpen(false);
+      setTempCameraImage(null);
+    }
+  };
+
+  // Batal Modal Kamera
+  const handleCloseCameraModal = () => {
+    setIsCameraModalOpen(false);
+    setTempCameraImage(null);
+  };
 
   // FUNGSI RESET SELURUH FILTER
   const handleResetFilter = () => {
@@ -104,20 +119,14 @@ export default function FormInput({ userSession, isAdmin }) {
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
 
-    // 1. Tamu Hari Ini
     const todayGuests = guests.filter(g => g.created_at && g.created_at.startsWith(todayStr));
-
-    // 2. Sedang Berkunjung (Status Active / Belum Checkout)
     const activeGuests = guests.filter(g => g.status === 'active' || !g.check_out_at);
-
-    // 3. Total Bulan Ini
     const monthGuests = guests.filter(g => {
       if (!g.created_at) return false;
       const d = new Date(g.created_at);
       return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
     });
 
-    // 4. Tujuan Bidang / Unit Kerja Terbanyak Bulan Ini
     const unitCounts = {};
     monthGuests.forEach(g => {
       const unit = g.tujuan_bidang || 'Lainnya';
@@ -159,7 +168,6 @@ export default function FormInput({ userSession, isAdmin }) {
   useEffect(() => {
     let result = guests;
 
-    // 1. Search Bar Teks (Nama / Instansi)
     if (searchTerm) {
       result = result.filter(
         (g) =>
@@ -168,17 +176,14 @@ export default function FormInput({ userSession, isAdmin }) {
       );
     }
 
-    // 2. Filter Status Kunjungan
     if (statusFilter !== 'all') {
       result = result.filter((g) => g.status === statusFilter);
     }
 
-    // 3. Filter Tujuan Bidang / Unit Kerja
     if (bidangFilter !== 'all') {
       result = result.filter((g) => g.tujuan_bidang === bidangFilter);
     }
 
-    // 4. Filter Tanggal
     if (dateFilter) {
       result = result.filter((g) => {
         const guestDate = new Date(g.created_at).toISOString().split('T')[0];
@@ -199,7 +204,6 @@ export default function FormInput({ userSession, isAdmin }) {
     if (file) {
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
-      setIsCameraActive(false);
     }
   };
 
@@ -252,9 +256,8 @@ export default function FormInput({ userSession, isAdmin }) {
       });
       setImageFile(null);
       setImagePreview(null);
-      setIsCameraActive(false);
 
-      const fileInput = document.querySelector('input[type="file"]');
+      const fileInput = document.getElementById('guest-photo-upload');
       if (fileInput) fileInput.value = '';
 
       fetchGuests();
@@ -299,7 +302,6 @@ export default function FormInput({ userSession, isAdmin }) {
     try {
       let new_foto_url = editingGuest.foto_url;
 
-      // Jika user memilih file foto baru saat edit
       if (editImageFile) {
         const fileExt = editImageFile.name.split('.').pop() || 'jpg';
         const fileName = `${Date.now()}.${fileExt}`;
@@ -406,7 +408,6 @@ export default function FormInput({ userSession, isAdmin }) {
       
       {/* 4 SUMMARY CARDS DI PALING ATAS */}
       <div className="summary-cards-grid">
-        {/* Card 1: Tamu Hari Ini */}
         <div className="summary-card card-yellow-border">
           <div className="card-header-content">
             <div>
@@ -415,12 +416,9 @@ export default function FormInput({ userSession, isAdmin }) {
             </div>
             <div className="card-icon-badge bg-badge-orange">👥</div>
           </div>
-          <div className="card-footer-text text-green">
-            ▲ Hari ini
-          </div>
+          <div className="card-footer-text text-green">▲ Hari ini</div>
         </div>
 
-        {/* Card 2: Sedang Berkunjung */}
         <div className="summary-card card-orange-border">
           <div className="card-header-content">
             <div>
@@ -429,12 +427,9 @@ export default function FormInput({ userSession, isAdmin }) {
             </div>
             <div className="card-icon-badge bg-badge-yellow">🕒</div>
           </div>
-          <div className="card-footer-text text-sub">
-            belum checkout
-          </div>
+          <div className="card-footer-text text-sub">belum checkout</div>
         </div>
 
-        {/* Card 3: Total Bulan Ini */}
         <div className="summary-card card-green-border">
           <div className="card-header-content">
             <div>
@@ -447,7 +442,6 @@ export default function FormInput({ userSession, isAdmin }) {
           </div>
         </div>
 
-        {/* Card 4: Tujuan Bidang Terbanyak */}
         <div className="summary-card card-blue-border">
           <div className="card-header-content">
             <div>
@@ -539,85 +533,54 @@ export default function FormInput({ userSession, isAdmin }) {
               />
             </div>
 
-            {/* INTEGRASI WEBCAM & INPUT FILE */}
-         <div className="form-group">
-          <label>Foto Tamu (Webcam / Upload File) *</label>
+            {/* SELEKSI FOTO TAMU RINGKAS */}
+            <div className="form-group">
+              <label>Foto Tamu *</label>
 
-          <div className="photo-input-container">
-            {isCameraActive ? (
-              <div className="webcam-container" style={{ textAlign: 'center' }}>
-                <Webcam
-                  audio={false}
-                  ref={webcamRef}
-                  screenshotFormat="image/jpeg"
-                  width="100%"
-                  videoConstraints={{ facingMode: 'user' }}
-                  style={{ borderRadius: '8px', border: '1px solid #cbd5e1' }}
-                />
-                <div className="webcam-action-buttons">
-                  <button
-                    type="button"
-                    className="btn-capture-photo"
-                    onClick={capturePhoto}
-                  >
-                     Ambil Foto
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-cancel-webcam"
-                    onClick={() => setIsCameraActive(false)}
-                  >
-                    Batal
-                  </button>
+              {/* Tampilan jika foto sudah diambil/dipilih */}
+              {imagePreview ? (
+                <div className="photo-preview-box">
+                  <img src={imagePreview} alt="Preview Foto Tamu" className="form-photo-thumbnail" />
+                  <div className="photo-preview-actions">
+                    <span className="photo-status-badge">✓ Foto Siap</span>
+                    <button
+                      type="button"
+                      className="btn-remove-photo"
+                      onClick={() => {
+                        setImagePreview(null);
+                        setImageFile(null);
+                        const fileInput = document.getElementById('guest-photo-upload');
+                        if (fileInput) fileInput.value = '';
+                      }}
+                    >
+                       Hapus
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="photo-input-options">
-                {/* Tombol Kamera */}
-                <button
-                  type="button"
-                  className="btn-webcam-trigger"
-                  onClick={() => setIsCameraActive(true)}
-                >
-                   Buka Kamera
-                </button>
-
-                {/* Custom Upload File Button */}
-                <label htmlFor="guest-photo-upload" className="custom-file-upload">
-                   Pilih File Foto
-                </label>
-                <input
-                  id="guest-photo-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden-file-input"
-                  onChange={handleImageChange}
-                />
-              </div>
-            )}
-
-            {/* Preview Foto */}
-            {imagePreview && !isCameraActive && (
-              <div className="image-preview-container" style={{ textAlign: 'center', marginTop: '8px' }}>
-                <img src={imagePreview} alt="Preview Foto Tamu" className="image-preview" />
-                <div>
+              ) : (
+                /* Tampilan tombol opsi foto jika belum ada foto */
+                <div className="photo-input-options">
                   <button
                     type="button"
-                    className="btn-remove-photo"
-                    onClick={() => {
-                      setImagePreview(null);
-                      setImageFile(null);
-                      const fileInput = document.getElementById('guest-photo-upload');
-                      if (fileInput) fileInput.value = '';
-                    }}
+                    className="btn-webcam-trigger"
+                    onClick={() => setIsCameraModalOpen(true)}
                   >
-                     Hapus Foto
+                    Ambil via Kamera
                   </button>
+
+                  <label htmlFor="guest-photo-upload" className="custom-file-upload">
+                     Upload File
+                  </label>
+                  <input
+                    id="guest-photo-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden-file-input"
+                    onChange={handleImageChange}
+                  />
                 </div>
-              </div>
-            )}
-          </div>
-        </div>
+              )}
+            </div>
 
             <button type="submit" className="btn-submit" disabled={loading}>
               {loading ? 'Menyimpan...' : 'Simpan Data Tamu'}
@@ -629,7 +592,6 @@ export default function FormInput({ userSession, isAdmin }) {
         <div className="table-card-right">
           <div className="table-card-header">
             <h2 className="form-title">Daftar Tamu Aktif & Riwayat</h2>
-            {/* Tombol Export Excel khusus Admin */}
             {isAdmin && (
               <button className="btn-export-excel-small" onClick={handleExportExcel}>
                 Export Excel
@@ -637,9 +599,7 @@ export default function FormInput({ userSession, isAdmin }) {
             )}
           </div>
 
-          {/* Filter Baris Atas & Bawah */}
           <div className="filter-container-wrapper">
-            {/* Baris 1: Search Bar, Filter Status, & Tanggal */}
             <div className="filter-row-top">
               <input
                 type="text"
@@ -667,7 +627,6 @@ export default function FormInput({ userSession, isAdmin }) {
               />
             </div>
 
-            {/* Baris 2: Dropdown Filter Tujuan Bidang & Tombol Reset */}
             <div className="filter-row-bottom">
               <select
                 className="filter-select-bidang-full"
@@ -689,7 +648,6 @@ export default function FormInput({ userSession, isAdmin }) {
                 <option value="UPT Pengujian Kendaraan Bermotor">UPT Pengujian Kendaraan Bermotor</option>
               </select>
 
-              {/* Tombol Reset Filter */}
               <button 
                 type="button" 
                 className="btn-reset-filter"
@@ -701,7 +659,6 @@ export default function FormInput({ userSession, isAdmin }) {
             </div>
           </div>
 
-          {/* Tabel Data Tamu */}
           <div className="table-responsive-right">
             <table className="guest-table-right">
               <thead>
@@ -762,7 +719,6 @@ export default function FormInput({ userSession, isAdmin }) {
                       </td>
                       <td>
                         <div className="action-buttons-cell">
-                          {/* Tombol Check-Out */}
                           {guest.status === 'active' && (
                             <button
                               className="btn-checkout-table"
@@ -772,7 +728,6 @@ export default function FormInput({ userSession, isAdmin }) {
                             </button>
                           )}
 
-                          {/* Tombol Edit Data Tamu */}
                           <button
                             className="btn-edit-table"
                             onClick={() => handleOpenEdit(guest)}
@@ -781,7 +736,6 @@ export default function FormInput({ userSession, isAdmin }) {
                             Edit
                           </button>
 
-                          {/* Tombol Hapus khusus Admin */}
                           {isAdmin && (
                             <button
                               className="btn-delete-table"
@@ -799,7 +753,6 @@ export default function FormInput({ userSession, isAdmin }) {
             </table>
           </div>
 
-          {/* NAVIGASI PAGINASI */}
           {filteredGuests.length > 0 && (
             <div className="pagination-container-right">
               <span className="pagination-info-right">
@@ -826,12 +779,79 @@ export default function FormInput({ userSession, isAdmin }) {
         </div>
       </div>
 
+      {/* MODAL KAMERA WEBCAM (POP-UP LENGKAP) */}
+      {isCameraModalOpen && (
+        <div className="modal-overlay" onClick={handleCloseCameraModal}>
+          <div className="camera-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="camera-modal-header">
+              <h3> Ambil Foto</h3>
+              <button className="edit-modal-close" onClick={handleCloseCameraModal}>&times;</button>
+            </div>
+
+            <div className="camera-viewport-box">
+              {tempCameraImage ? (
+                <img src={tempCameraImage} alt="Foto Jepretan Kamera" className="camera-captured-img" />
+              ) : (
+                <Webcam
+                  audio={false}
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                  width="100%"
+                  height="100%"
+                  videoConstraints={{ facingMode: 'user' }}
+                  className="webcam-live-view"
+                />
+              )}
+            </div>
+
+            <div className="camera-modal-actions">
+              {tempCameraImage ? (
+                <>
+                  <button
+                    type="button"
+                    className="btn-cancel"
+                    onClick={() => setTempCameraImage(null)}
+                  >
+                    🔄 Foto Ulang
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-confirm-delete"
+                    style={{ backgroundColor: '#10b981' }}
+                    onClick={handleConfirmCameraPhoto}
+                  >
+                    ✅ Gunakan Foto Ini
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className="btn-cancel"
+                    onClick={handleCloseCameraModal}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-capture-photo"
+                    onClick={handleCaptureTemp}
+                  >
+                    📸 Tangkap Foto
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MODAL EDIT DATA TAMU */}
       {editingGuest && (
         <div className="modal-overlay" onClick={() => setEditingGuest(null)}>
           <div className="edit-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="edit-modal-header">
-              <h3> Edit Data Tamu</h3>
+              <h3>✏️ Edit Data Tamu</h3>
               <button className="edit-modal-close" onClick={() => setEditingGuest(null)}>&times;</button>
             </div>
 
@@ -966,7 +986,7 @@ export default function FormInput({ userSession, isAdmin }) {
         </div>
       )}
 
-      {/* MODAL PREVIEW FOTO TAMU (KLIK GAMBAR) */}
+      {/* MODAL PREVIEW FOTO TAMU (KLIK GAMBAR TABEL) */}
       {previewImage && (
         <div className="image-preview-overlay" onClick={() => setPreviewImage(null)}>
           <div className="image-preview-content" onClick={(e) => e.stopPropagation()}>

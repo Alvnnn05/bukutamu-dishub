@@ -812,7 +812,7 @@ export default function FormInput({ userSession, isAdmin }) {
                     className="btn-cancel"
                     onClick={() => setTempCameraImage(null)}
                   >
-                    🔄 Foto Ulang
+                     Foto Ulang
                   </button>
                   <button
                     type="button"
@@ -820,7 +820,7 @@ export default function FormInput({ userSession, isAdmin }) {
                     style={{ backgroundColor: '#10b981' }}
                     onClick={handleConfirmCameraPhoto}
                   >
-                    ✅ Gunakan Foto Ini
+                     Gunakan Foto Ini
                   </button>
                 </>
               ) : (
@@ -837,7 +837,7 @@ export default function FormInput({ userSession, isAdmin }) {
                     className="btn-capture-photo"
                     onClick={handleCaptureTemp}
                   >
-                    📸 Tangkap Foto
+                     Tangkap Foto
                   </button>
                 </>
               )}
@@ -851,7 +851,7 @@ export default function FormInput({ userSession, isAdmin }) {
         <div className="modal-overlay" onClick={() => setEditingGuest(null)}>
           <div className="edit-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="edit-modal-header">
-              <h3>✏️ Edit Data Tamu</h3>
+              <h3> Edit Data Tamu</h3>
               <button className="edit-modal-close" onClick={() => setEditingGuest(null)}>&times;</button>
             </div>
 

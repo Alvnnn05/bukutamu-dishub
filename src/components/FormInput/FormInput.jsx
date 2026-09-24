@@ -798,7 +798,7 @@ export default function FormInput({ userSession, isAdmin }) {
                   screenshotFormat="image/jpeg"
                   width="100%"
                   height="100%"
-                  videoConstraints={{ facingMode: 'user' }}
+                  videoConstraints={{ facingMode: 'environment' }}
                   className="webcam-live-view"
                 />
               )}

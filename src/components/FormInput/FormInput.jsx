@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import React from 'react';
 import Webcam from 'react-webcam';
+import imageCompression from 'browser-image-compression';
 import { supabase } from '../../lib/supabaseClient';
 import * as XLSX from 'xlsx';
 import './FormInput.css';
@@ -58,6 +59,14 @@ export default function FormInput({ userSession, isAdmin }) {
   // State Paginasi (5 Data per Halaman)
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  // Opsi konfigurasi kompresi foto
+  const compressionOptions = {
+    maxSizeMB: 0.2,          // Ukuran maksimal file hasil kompresi (~200 KB)
+    maxWidthOrHeight: 1024,  // Resolusi maksimal (1024px)
+    useWebWorker: true,
+    fileType: 'image/jpeg'
+  };
 
   // Helper: Konversi dataURL (Base64 dari Webcam) menjadi File Object
   const urlToFile = async (url, filename, mimeType) => {
@@ -207,7 +216,7 @@ export default function FormInput({ userSession, isAdmin }) {
     }
   };
 
-  // Submit Simpan Tamu Baru
+  // Submit Simpan Tamu Baru (Dengan Kompresi Otomatis)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -216,13 +225,15 @@ export default function FormInput({ userSession, isAdmin }) {
       let foto_url = null;
 
       if (imageFile) {
-        const fileExt = imageFile.name.split('.').pop() || 'jpg';
-        const fileName = `${Date.now()}.${fileExt}`;
+        // Kompresi foto terlebih dahulu sebelum diunggah
+        const compressedFile = await imageCompression(imageFile, compressionOptions);
+
+        const fileName = `${Date.now()}.jpg`;
         const filePath = `tamu/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('foto-tamu')
-          .upload(filePath, imageFile);
+          .upload(filePath, compressedFile);
 
         if (uploadError) throw new Error('Gagal unggah foto: ' + uploadError.message);
 
@@ -303,13 +314,15 @@ export default function FormInput({ userSession, isAdmin }) {
       let new_foto_url = editingGuest.foto_url;
 
       if (editImageFile) {
-        const fileExt = editImageFile.name.split('.').pop() || 'jpg';
-        const fileName = `${Date.now()}.${fileExt}`;
+        // Kompresi foto baru saat edit
+        const compressedFile = await imageCompression(editImageFile, compressionOptions);
+
+        const fileName = `${Date.now()}.jpg`;
         const filePath = `tamu/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('foto-tamu')
-          .upload(filePath, editImageFile);
+          .upload(filePath, compressedFile);
 
         if (uploadError) throw new Error('Gagal unggah foto baru: ' + uploadError.message);
 
@@ -553,7 +566,7 @@ export default function FormInput({ userSession, isAdmin }) {
                         if (fileInput) fileInput.value = '';
                       }}
                     >
-                       Hapus
+                      Hapus
                     </button>
                   </div>
                 </div>
@@ -569,7 +582,7 @@ export default function FormInput({ userSession, isAdmin }) {
                   </button>
 
                   <label htmlFor="guest-photo-upload" className="custom-file-upload">
-                     Upload File
+                    Upload File
                   </label>
                   <input
                     id="guest-photo-upload"
@@ -779,12 +792,12 @@ export default function FormInput({ userSession, isAdmin }) {
         </div>
       </div>
 
-      {/* MODAL KAMERA WEBCAM (POP-UP LENGKAP) */}
+      {/* MODAL KAMERA WEBCAM */}
       {isCameraModalOpen && (
         <div className="modal-overlay" onClick={handleCloseCameraModal}>
           <div className="camera-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="camera-modal-header">
-              <h3> Ambil Foto</h3>
+              <h3>Ambil Foto</h3>
               <button className="edit-modal-close" onClick={handleCloseCameraModal}>&times;</button>
             </div>
 
@@ -812,7 +825,7 @@ export default function FormInput({ userSession, isAdmin }) {
                     className="btn-cancel"
                     onClick={() => setTempCameraImage(null)}
                   >
-                     Foto Ulang
+                    Foto Ulang
                   </button>
                   <button
                     type="button"
@@ -820,7 +833,7 @@ export default function FormInput({ userSession, isAdmin }) {
                     style={{ backgroundColor: '#10b981' }}
                     onClick={handleConfirmCameraPhoto}
                   >
-                     Gunakan Foto Ini
+                    Gunakan Foto Ini
                   </button>
                 </>
               ) : (
@@ -837,7 +850,7 @@ export default function FormInput({ userSession, isAdmin }) {
                     className="btn-capture-photo"
                     onClick={handleCaptureTemp}
                   >
-                     Tangkap Foto
+                    Tangkap Foto
                   </button>
                 </>
               )}
@@ -851,7 +864,7 @@ export default function FormInput({ userSession, isAdmin }) {
         <div className="modal-overlay" onClick={() => setEditingGuest(null)}>
           <div className="edit-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="edit-modal-header">
-              <h3> Edit Data Tamu</h3>
+              <h3>Edit Data Tamu</h3>
               <button className="edit-modal-close" onClick={() => setEditingGuest(null)}>&times;</button>
             </div>
 
